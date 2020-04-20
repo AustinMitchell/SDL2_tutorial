@@ -1,0 +1,5 @@
+*.o
+objects/
+objects-debug/
+bin/
+.vscode

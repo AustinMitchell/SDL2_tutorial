@@ -1,0 +1,61 @@
+#!/usr/bin/python3
+
+import argparse
+import C_build_script.make as make
+import shutil
+import os
+
+from pathlib import Path
+
+def main():
+
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("-s", action='store', type=str, metavar="SOURCE",   help="Source file to generate executable from")
+    argparser.add_argument("-o", action='store', type=str, metavar="EXE NAME", help="Executable output name")
+    argparser.add_argument("-d", action='store_true', help="Sets build to debug mode")
+    argparser.add_argument("-c", action='store_true', help="Cleans all output files")
+    args = argparser.parse_args()
+
+    if args.c:
+        if os.path.exists("bin"):
+            print("Removing 'bin/'")
+            shutil.rmtree("bin")
+        if os.path.exists("objects"):
+            print("Removing 'objects/'")
+            shutil.rmtree("objects")
+        if os.path.exists("objects-debug"):
+            print("Removing 'objects-debug/'")
+            shutil.rmtree("objects-debug")
+
+    if args.s:
+        config = {
+            "COMPILER":     "clang++",
+            "EXE_DIR":      "./bin",
+            "SOURCE_MAIN":  Path(args.s).name,
+            "SOURCE_DIR":   "./src/",
+            "SOURCE_EXT":   "cpp",
+            "HEADER_DIR":   "./include/",
+            "HEADER_EXT":   "hpp",
+            "OBJECT_EXT":   "o",
+            "OTHER_INCLUDES": "",
+            "RESOURCES": [{"in":"res/images", "out":"images"}]
+        }
+
+        if args.d:
+            config["FLAGS"]         = "-std=c++17 -Wall -Wextra -Wpedantic -g -DDEBUG -lSDL2"
+            config["OBJECT_DIR"]    = "./objects-debug/"
+            config["EXE_FILE"]      = Path(args.s).stem + "-debug"
+        else:
+            config["FLAGS"]         = "-std=c++17 -Wall -Wextra -Wpedantic -O3 -lSDL2"
+            config["OBJECT_DIR"]    = "./objects/"
+            config["EXE_FILE"]      = Path(args.s).stem
+
+        if args.o:
+            config["EXE_FILE"]      = args.o
+
+        make.parse_dict(config)
+        make.execute("build")
+
+
+if __name__ == "__main__":
+    main()
