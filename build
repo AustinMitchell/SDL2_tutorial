@@ -44,11 +44,11 @@ def main():
         if args.d:
             config["FLAGS"]         = "-std=c++17 -Wall -Wextra -Wpedantic -g -DDEBUG -lSDL2"
             config["OBJECT_DIR"]    = "./objects-debug/"
-            config["EXE_FILE"]      = Path(args.s).stem + "-debug"
+            config["EXE_FILE"]      = "prog-debug"
         else:
             config["FLAGS"]         = "-std=c++17 -Wall -Wextra -Wpedantic -O3 -lSDL2"
             config["OBJECT_DIR"]    = "./objects/"
-            config["EXE_FILE"]      = Path(args.s).stem
+            config["EXE_FILE"]      = "prog"
 
         if args.o:
             config["EXE_FILE"]      = args.o

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cd ./bin
+if [ "$2" == "debug" ]; then
+    ./prog-debug
+else
+    ./prog
+fi
