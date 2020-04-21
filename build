@@ -30,6 +30,7 @@ def main():
     if args.s:
         config = {
             "COMPILER":     "clang++",
+            "LINKER_FLAGS": "-lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer",
             "EXE_DIR":      "./bin",
             "SOURCE_MAIN":  Path(args.s).name,
             "SOURCE_DIR":   "./src/",
@@ -42,13 +43,13 @@ def main():
         }
 
         if args.d:
-            config["FLAGS"]         = "-std=c++17 -Wall -Wextra -Wpedantic -g -DDEBUG -lSDL2"
-            config["OBJECT_DIR"]    = "./objects-debug/"
-            config["EXE_FILE"]      = "prog-debug"
+            config["COMPILER_FLAGS"] = "-std=c++17 -Wall -Wextra -Wpedantic -g -DDEBUG "
+            config["OBJECT_DIR"]     = "./objects-debug/"
+            config["EXE_FILE"]       = "prog-debug"
         else:
-            config["FLAGS"]         = "-std=c++17 -Wall -Wextra -Wpedantic -O3 -lSDL2"
-            config["OBJECT_DIR"]    = "./objects/"
-            config["EXE_FILE"]      = "prog"
+            config["COMPILER_FLAGS"] = "-std=c++17 -Wall -Wextra -Wpedantic -O3"
+            config["OBJECT_DIR"]     = "./objects/"
+            config["EXE_FILE"]       = "prog"
 
         if args.o:
             config["EXE_FILE"]      = args.o
