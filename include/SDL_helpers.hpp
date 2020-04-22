@@ -17,11 +17,6 @@ struct ManagedSDLTexture;
 struct ManagedSDLRenderer;
 
 
-struct colour {
-    uint8_t r, g, b;
-};
-
-
 struct ManagedSDLWindow {
     using window_ptr = std::unique_ptr<SDL_Window, void(*)(SDL_Window*)>;
 
@@ -39,6 +34,8 @@ struct ManagedSDLWindow {
     explicit operator bool() { return window_ != nullptr; }
     SDL_Window* operator->() { return window_.get(); }
 };
+
+
 
 struct ManagedSDLSurface {
     using surface_ptr = std::unique_ptr<SDL_Surface, void(*)(SDL_Surface*)>;
@@ -58,6 +55,28 @@ struct ManagedSDLSurface {
     SDL_Surface* operator->() { return surface_.get(); }
 };
 
+
+
+struct ManagedTTFFont {
+    using font_ptr = std::unique_ptr<TTF_Font, void(*)(TTF_Font*)>;
+
+    font_ptr font_;
+
+    ManagedTTFFont(): font_(nullptr, TTF_CloseFont) {}
+    explicit ManagedTTFFont(TTF_Font* font): font_(font, TTF_CloseFont) {}
+
+    auto operator=(TTF_Font* font) -> ManagedTTFFont& {
+        font_ = font_ptr{font, TTF_CloseFont};
+        return *this;
+    }
+
+    operator TTF_Font*() { return font_.get(); }
+    explicit operator bool() { return font_ != nullptr; }
+    TTF_Font* operator->() { return font_.get(); }
+};
+
+
+
 struct ManagedSDLRenderer {
     using renderer_ptr = std::unique_ptr<SDL_Renderer, void(*)(SDL_Renderer*)>;
 
@@ -75,6 +94,8 @@ struct ManagedSDLRenderer {
     explicit operator bool() { return renderer_ != nullptr; }
     SDL_Renderer* operator->() { return renderer_.get(); }
 };
+
+
 
 struct ManagedSDLTexture {
     using texture_ptr = std::unique_ptr<SDL_Texture, void(*)(SDL_Texture*)>;
@@ -96,7 +117,7 @@ struct ManagedSDLTexture {
     auto width()  -> int { return render_quad.w; }
     auto height() -> int { return render_quad.h; }
 
-    auto setColour(colour const& c) {
+    auto setColour(SDL_Colour const& c) {
         SDL_SetTextureColorMod(*this, c.r, c.g, c.b);
     }
 
