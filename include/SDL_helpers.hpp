@@ -3,8 +3,17 @@
 #pragma once
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
+
 #include <memory>
 #include <utility>
+
+struct ManagedSDLWindow;
+struct ManagedSDLSurface;
+struct ManagedSDLTexture;
+struct ManagedSDLRenderer;
 
 struct ManagedSDLWindow {
     using window_ptr = std::unique_ptr<SDL_Window, void(*)(SDL_Window*)>;
@@ -42,24 +51,6 @@ struct ManagedSDLSurface {
     SDL_Surface* operator->() { return surface_.get(); }
 };
 
-struct ManagedSDLTexture {
-    using texture_ptr = std::unique_ptr<SDL_Texture, void(*)(SDL_Texture*)>;
-
-    texture_ptr texture_;
-
-    ManagedSDLTexture(): texture_(nullptr, SDL_DestroyTexture) {}
-    explicit ManagedSDLTexture(SDL_Texture* texture): texture_(texture, SDL_DestroyTexture) {}
-
-    auto operator=(SDL_Texture* texture) -> ManagedSDLTexture& {
-        texture_ = texture_ptr{texture, SDL_DestroyTexture};
-        return *this;
-    }
-
-    operator SDL_Texture*() { return texture_.get(); }
-    explicit operator bool() { return texture_ != nullptr; }
-    SDL_Texture* operator->() { return texture_.get(); }
-};
-
 struct ManagedSDLRenderer {
     using renderer_ptr = std::unique_ptr<SDL_Renderer, void(*)(SDL_Renderer*)>;
 
@@ -76,4 +67,37 @@ struct ManagedSDLRenderer {
     operator SDL_Renderer*() { return renderer_.get(); }
     explicit operator bool() { return renderer_ != nullptr; }
     SDL_Renderer* operator->() { return renderer_.get(); }
+};
+
+struct ManagedSDLTexture {
+    using texture_ptr = std::unique_ptr<SDL_Texture, void(*)(SDL_Texture*)>;
+
+    SDL_Rect    render_quad;
+    texture_ptr texture_;
+
+    ManagedSDLTexture(): texture_(nullptr, SDL_DestroyTexture) {}
+    explicit ManagedSDLTexture(SDL_Texture* texture): texture_(texture, SDL_DestroyTexture) {
+        SDL_QueryTexture(texture, nullptr, nullptr, &render_quad.w, &render_quad.h);
+    }
+
+    auto operator=(SDL_Texture* texture) -> ManagedSDLTexture& {
+        texture_ = texture_ptr{texture, SDL_DestroyTexture};
+        SDL_QueryTexture(texture, nullptr, nullptr, &render_quad.w, &render_quad.h);
+        return *this;
+    }
+
+    auto width()  -> int { return render_quad.w; }
+    auto height() -> int { return render_quad.h; }
+
+    auto render(ManagedSDLRenderer& renderer, int x, int y) {
+        render_quad.x = x;
+        render_quad.y = y;
+        SDL_RenderCopy(renderer, *this, NULL, &render_quad);
+    }
+
+    operator SDL_Texture*() { return texture_.get(); }
+
+    explicit operator bool() { return texture_ != nullptr; }
+
+    auto operator->() -> SDL_Texture* { return texture_.get(); }
 };
