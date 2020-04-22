@@ -16,6 +16,12 @@ struct ManagedSDLSurface;
 struct ManagedSDLTexture;
 struct ManagedSDLRenderer;
 
+
+struct colour {
+    uint8_t r, g, b;
+};
+
+
 struct ManagedSDLWindow {
     using window_ptr = std::unique_ptr<SDL_Window, void(*)(SDL_Window*)>;
 
@@ -89,6 +95,10 @@ struct ManagedSDLTexture {
 
     auto width()  -> int { return render_quad.w; }
     auto height() -> int { return render_quad.h; }
+
+    auto setColour(colour const& c) -> void {
+        SDL_SetTextureColorMod(*this, c.r, c.g, c.b);
+    }
 
     auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_Rect* clip = nullptr) {
         render_quad.x = x;
