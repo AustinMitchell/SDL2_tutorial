@@ -108,7 +108,7 @@ struct ManagedSDLTexture {
         SDL_SetTextureAlphaMod(*this, alpha);
     }
 
-    auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_Rect* clip = nullptr) {
+    auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_Rect* clip=nullptr, double angle=0.0, SDL_Point* center=nullptr, SDL_RendererFlip flip=SDL_FLIP_NONE) {
         render_quad.x = x;
         render_quad.y = y;
 
@@ -117,7 +117,16 @@ struct ManagedSDLTexture {
             render_quad.h = clip->h;
         }
 
-        SDL_RenderCopy(renderer, *this, clip, &render_quad);
+        SDL_RenderCopyEx(renderer, *this, clip, &render_quad, angle, center, flip);
+    }
+    auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_RendererFlip flip) {
+        render(renderer, x, y, nullptr, 0.0, nullptr, flip);
+    }
+    auto render(ManagedSDLRenderer& renderer, int x, int y, double angle, SDL_Point* center) {
+        render(renderer, x, y, nullptr, angle, center, SDL_FLIP_NONE);
+    }
+    auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_Rect* clip) {
+        render(renderer, x, y, clip, 0.0, nullptr, SDL_FLIP_NONE);
     }
 
     operator SDL_Texture*() { return texture_.get(); }
