@@ -41,3 +41,39 @@ struct ManagedSDLSurface {
     explicit operator bool() { return surface_ != nullptr; }
     SDL_Surface* operator->() { return surface_.get(); }
 };
+
+struct ManagedSDLTexture {
+    using texture_ptr = std::unique_ptr<SDL_Texture, void(*)(SDL_Texture*)>;
+
+    texture_ptr texture_;
+
+    ManagedSDLTexture(): texture_(nullptr, SDL_DestroyTexture) {}
+    explicit ManagedSDLTexture(SDL_Texture* texture): texture_(texture, SDL_DestroyTexture) {}
+
+    auto operator=(SDL_Texture* texture) -> ManagedSDLTexture& {
+        texture_ = texture_ptr{texture, SDL_DestroyTexture};
+        return *this;
+    }
+
+    operator SDL_Texture*() { return texture_.get(); }
+    explicit operator bool() { return texture_ != nullptr; }
+    SDL_Texture* operator->() { return texture_.get(); }
+};
+
+struct ManagedSDLRenderer {
+    using renderer_ptr = std::unique_ptr<SDL_Renderer, void(*)(SDL_Renderer*)>;
+
+    renderer_ptr renderer_;
+
+    ManagedSDLRenderer(): renderer_(nullptr, SDL_DestroyRenderer) {}
+    explicit ManagedSDLRenderer(SDL_Renderer* renderer): renderer_(renderer, SDL_DestroyRenderer) {}
+
+    auto operator=(SDL_Renderer* renderer) -> ManagedSDLRenderer& {
+        renderer_ = renderer_ptr{renderer, SDL_DestroyRenderer};
+        return *this;
+    }
+
+    operator SDL_Renderer*() { return renderer_.get(); }
+    explicit operator bool() { return renderer_ != nullptr; }
+    SDL_Renderer* operator->() { return renderer_.get(); }
+};
