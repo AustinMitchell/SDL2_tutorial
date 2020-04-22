@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <utility>
+#include <optional>
 
 struct ManagedSDLWindow;
 struct ManagedSDLSurface;
@@ -89,10 +90,16 @@ struct ManagedSDLTexture {
     auto width()  -> int { return render_quad.w; }
     auto height() -> int { return render_quad.h; }
 
-    auto render(ManagedSDLRenderer& renderer, int x, int y) {
+    auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_Rect* clip = nullptr) {
         render_quad.x = x;
         render_quad.y = y;
-        SDL_RenderCopy(renderer, *this, NULL, &render_quad);
+
+        if (clip) {
+            render_quad.w = clip->w;
+            render_quad.h = clip->h;
+        }
+
+        SDL_RenderCopy(renderer, *this, clip, &render_quad);
     }
 
     operator SDL_Texture*() { return texture_.get(); }
