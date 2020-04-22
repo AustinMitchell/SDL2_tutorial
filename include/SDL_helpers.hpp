@@ -96,8 +96,16 @@ struct ManagedSDLTexture {
     auto width()  -> int { return render_quad.w; }
     auto height() -> int { return render_quad.h; }
 
-    auto setColour(colour const& c) -> void {
+    auto setColour(colour const& c) {
         SDL_SetTextureColorMod(*this, c.r, c.g, c.b);
+    }
+
+    auto setBlendMode(SDL_BlendMode blending) {
+        SDL_SetTextureBlendMode(*this, blending);
+    }
+
+    auto setAlpha(uint8_t alpha) {
+        SDL_SetTextureAlphaMod(*this, alpha);
     }
 
     auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_Rect* clip = nullptr) {
