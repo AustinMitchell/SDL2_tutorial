@@ -39,7 +39,7 @@ def main():
             "HEADER_EXT":   "hpp",
             "OBJECT_EXT":   "o",
             "OTHER_INCLUDES": "",
-            "RESOURCES": [{"in":"res/images", "out":"images"}]
+            "RESOURCES": [{"in":"res/images", "out":"images"}, {"in":"res/fonts", "out":"fonts"}]
         }
 
         if args.d:
