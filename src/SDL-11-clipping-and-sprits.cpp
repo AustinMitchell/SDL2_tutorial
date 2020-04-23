@@ -144,53 +144,32 @@ auto init(ProgramData& data) -> bool {
 auto loadMedia(ProgramData& data) -> bool {
     bool success;
 
-    auto cyan = color{0, 0xFF, 0xFF, 0};
+    // Create window
+    data.window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    if (!data.window) {
+        cout << "Window could not be created. SDL_Error: " << SDL_GetError() << "\n";
+        return false;
+    }
 
-    success = loadTexture(data.sprite_sheet, "images/dots.png", data.renderer, cyan);
+    // create renderer
+    data.renderer = SDL_CreateRenderer(data.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!data.renderer) {
+        cout << "Renderer could not be created. SDL_Error: " << SDL_GetError() << "\n";
+        return false;
+    }
+
+    // Initialize renderer color
+    SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
+    auto cyan = SDL_Colour{0, 0xFF, 0xFF, 0};
+
+    success = loadTextureFromFile(data.sprite_sheet, data.renderer, "images/dots.png", cyan);
     if (!success) { return false; }
 
     data.sprite_clips[0] = {0,   0,   100, 100};
     data.sprite_clips[1] = {100, 0,   100, 100};
     data.sprite_clips[2] = {0,   100, 100, 100};
     data.sprite_clips[3] = {100, 100, 100, 100};
-
-    return true;
-}
-
-
-auto loadSurface(ManagedSDLSurface& image_surface, char const* image_name, ManagedSDLSurface& screen_surface) -> bool {
-    auto raw_surface    = ManagedSDLSurface{IMG_Load(image_name)};
-
-    if (!raw_surface) {
-        cout << "Unable to load image " << image_name << ". SDL Error: " << IMG_GetError() << "\n";
-        return false;
-    }
-    image_surface = SDL_ConvertSurface(raw_surface, screen_surface->format, 0);
-    if (!image_surface) {
-        cout << "Unable to optimize image " << image_name << ". SDL Error: " << SDL_GetError() << "\n";
-        return false;
-    }
-
-    return true;
-}
-
-auto loadTexture(ManagedSDLTexture& texture, char const* image_name, ManagedSDLRenderer& renderer, std::optional<color> color_key={}) -> bool {
-    auto loaded_surface = ManagedSDLSurface{IMG_Load(image_name)};
-
-    if (!loaded_surface) {
-        cout << "Unable to load image " << image_name << ". SDL Error: " << IMG_GetError() << "\n";
-        return false;
-    }
-
-    if (color_key) {
-        SDL_SetColorKey(loaded_surface, SDL_TRUE, SDL_MapRGB(loaded_surface->format, color_key->r, color_key->g, color_key->b));
-    }
-
-    texture = SDL_CreateTextureFromSurface(renderer, loaded_surface);
-    if (!texture) {
-        cout << "Unable to create texture from " << image_name << ". SDL Error: " << SDL_GetError() << "\n";
-        return false;
-    }
 
     return true;
 }

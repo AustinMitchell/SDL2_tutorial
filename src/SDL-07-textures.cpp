@@ -29,11 +29,7 @@ struct ProgramData {
 
 
 auto run() -> bool;
-auto init(ProgramData&) -> bool;
 bool loadMedia(ProgramData&);
-auto loadSurface(ManagedSDLSurface&, char const*, ManagedSDLSurface&) -> bool;
-auto loadTexture(ManagedSDLTexture&, char const*, ManagedSDLRenderer&) -> bool;
-
 
 int main() {
     run();
@@ -55,7 +51,7 @@ auto run() -> bool {
     stretchRect.w = SCREEN_WIDTH;
     stretchRect.h = SCREEN_HEIGHT;
 
-    if (!init(data)) {
+    if (!init()) {
         cout << "Failed to initialize.\n";
         return false;
     }
@@ -83,12 +79,8 @@ auto run() -> bool {
 }
 
 
-auto init(ProgramData& data) -> bool {
-    // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        cout << "SDL could not initialize. SDL_Error: " << SDL_GetError() << "\n";
-        return false;
-    }
+bool loadMedia(ProgramData& data) {
+    bool success = true;
 
     // Create window
     data.window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
@@ -98,7 +90,7 @@ auto init(ProgramData& data) -> bool {
     }
 
     // create renderer
-    data.renderer = SDL_CreateRenderer(data.window, -1, SDL_RENDERER_ACCELERATED);
+    data.renderer = SDL_CreateRenderer(data.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!data.renderer) {
         cout << "Renderer could not be created. SDL_Error: " << SDL_GetError() << "\n";
         return false;
@@ -107,59 +99,8 @@ auto init(ProgramData& data) -> bool {
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    // Initialize PNG loading
-    auto imgFlags = IMG_INIT_PNG;
-    if (!(IMG_Init(imgFlags) & imgFlags)) {
-        cout << "SDL_image could not initialize. SDL_image Error: " << IMG_GetError() << "\n";
-        return false;
-    }
-
-    // Get window surface
-    data.screen_surface = SDL_GetWindowSurface(data.window);
-
-    return true;
-}
-
-bool loadMedia(ProgramData& data) {
-    bool success = true;
-
-    success = loadTexture(data.texture, "images/texture.png", data.renderer);
+    success = loadTextureFromFile(data.texture, data.renderer, "images/texture.png");
     if (!success) { return false; }
-
-    return true;
-}
-
-
-bool loadSurface(ManagedSDLSurface& image_surface, char const* image_name, ManagedSDLSurface& screen_surface) {
-    auto raw_surface    = ManagedSDLSurface{IMG_Load(image_name)};
-
-    if (!raw_surface) {
-        cout << "Unable to load image " << image_name << ". SDL Error: " << IMG_GetError() << "\n";
-        return false;
-    } else {
-        image_surface = SDL_ConvertSurface(raw_surface, screen_surface->format, 0);
-        if (!image_surface) {
-            cout << "Unable to optimize image " << image_name << ". SDL Error: " << SDL_GetError() << "\n";
-            return false;
-        }
-    }
-
-    return true;
-}
-
-auto loadTexture(ManagedSDLTexture& texture, char const* image_name, ManagedSDLRenderer& renderer) -> bool {
-    auto loaded_surface = ManagedSDLSurface{IMG_Load(image_name)};
-
-    if (!loaded_surface) {
-        cout << "Unable to load image " << image_name << ". SDL Error: " << IMG_GetError() << "\n";
-        return false;
-    } else {
-        texture = SDL_CreateTextureFromSurface(renderer, loaded_surface);
-        if (!texture) {
-            cout << "Unable to create texture from " << image_name << ". SDL Error: " << SDL_GetError() << "\n";
-            return false;
-        }
-    }
 
     return true;
 }

@@ -11,30 +11,21 @@
 #include <utility>
 #include <optional>
 
-struct ManagedSDLWindow;
-struct ManagedSDLSurface;
-struct ManagedSDLTexture;
-struct ManagedSDLRenderer;
-
 
 struct ManagedSDLWindow {
     using window_ptr = std::unique_ptr<SDL_Window, void(*)(SDL_Window*)>;
 
     window_ptr window_;
 
-    ManagedSDLWindow(): window_(nullptr, SDL_DestroyWindow) {}
-    explicit ManagedSDLWindow(SDL_Window* window): window_(window, SDL_DestroyWindow) {}
+    ManagedSDLWindow();
+    explicit ManagedSDLWindow(SDL_Window* window);
 
-    auto operator=(SDL_Window* window) -> ManagedSDLWindow& {
-        window_ = window_ptr{window, SDL_DestroyWindow};
-        return *this;
-    }
+    auto operator=(SDL_Window* window) -> ManagedSDLWindow&;
 
-    operator SDL_Window*() { return window_.get(); }
-    explicit operator bool() { return window_ != nullptr; }
-    SDL_Window* operator->() { return window_.get(); }
+    operator SDL_Window*();
+    explicit operator bool();
+    auto operator->() -> SDL_Window*;
 };
-
 
 
 struct ManagedSDLSurface {
@@ -42,19 +33,15 @@ struct ManagedSDLSurface {
 
     surface_ptr surface_;
 
-    ManagedSDLSurface(): surface_(nullptr, SDL_FreeSurface) {}
-    explicit ManagedSDLSurface(SDL_Surface* surface): surface_(surface, SDL_FreeSurface) {}
+    ManagedSDLSurface();
+    explicit ManagedSDLSurface(SDL_Surface* surface);
 
-    auto operator=(SDL_Surface* surface) -> ManagedSDLSurface& {
-        surface_ = surface_ptr{surface, SDL_FreeSurface};
-        return *this;
-    }
+    auto operator=(SDL_Surface* surface) -> ManagedSDLSurface&;
 
-    operator SDL_Surface*() { return surface_.get(); }
-    explicit operator bool() { return surface_ != nullptr; }
-    SDL_Surface* operator->() { return surface_.get(); }
+    operator SDL_Surface*();
+    explicit operator bool();
+    auto operator->() -> SDL_Surface*;
 };
-
 
 
 struct ManagedTTFFont {
@@ -62,19 +49,15 @@ struct ManagedTTFFont {
 
     font_ptr font_;
 
-    ManagedTTFFont(): font_(nullptr, TTF_CloseFont) {}
-    explicit ManagedTTFFont(TTF_Font* font): font_(font, TTF_CloseFont) {}
+    ManagedTTFFont();
+    explicit ManagedTTFFont(TTF_Font* font);
 
-    auto operator=(TTF_Font* font) -> ManagedTTFFont& {
-        font_ = font_ptr{font, TTF_CloseFont};
-        return *this;
-    }
+    auto operator=(TTF_Font* font) -> ManagedTTFFont&;
 
-    operator TTF_Font*() { return font_.get(); }
-    explicit operator bool() { return font_ != nullptr; }
-    TTF_Font* operator->() { return font_.get(); }
+    operator TTF_Font*();
+    explicit operator bool();
+    auto operator->() -> TTF_Font*;
 };
-
 
 
 struct ManagedSDLRenderer {
@@ -82,19 +65,15 @@ struct ManagedSDLRenderer {
 
     renderer_ptr renderer_;
 
-    ManagedSDLRenderer(): renderer_(nullptr, SDL_DestroyRenderer) {}
-    explicit ManagedSDLRenderer(SDL_Renderer* renderer): renderer_(renderer, SDL_DestroyRenderer) {}
+    ManagedSDLRenderer();
+    explicit ManagedSDLRenderer(SDL_Renderer* renderer);
 
-    auto operator=(SDL_Renderer* renderer) -> ManagedSDLRenderer& {
-        renderer_ = renderer_ptr{renderer, SDL_DestroyRenderer};
-        return *this;
-    }
+    auto operator=(SDL_Renderer* renderer) -> ManagedSDLRenderer&;
 
-    operator SDL_Renderer*() { return renderer_.get(); }
-    explicit operator bool() { return renderer_ != nullptr; }
-    SDL_Renderer* operator->() { return renderer_.get(); }
+    operator SDL_Renderer*();
+    explicit operator bool();
+    auto operator->() -> SDL_Renderer*;
 };
-
 
 
 struct ManagedSDLTexture {
@@ -103,56 +82,36 @@ struct ManagedSDLTexture {
     SDL_Rect    render_quad;
     texture_ptr texture_;
 
-    ManagedSDLTexture(): texture_(nullptr, SDL_DestroyTexture) {}
-    explicit ManagedSDLTexture(SDL_Texture* texture): texture_(texture, SDL_DestroyTexture) {
-        SDL_QueryTexture(texture, nullptr, nullptr, &render_quad.w, &render_quad.h);
-    }
+    ManagedSDLTexture();
+    explicit ManagedSDLTexture(SDL_Texture* texture);
 
-    auto operator=(SDL_Texture* texture) -> ManagedSDLTexture& {
-        texture_ = texture_ptr{texture, SDL_DestroyTexture};
-        SDL_QueryTexture(texture, nullptr, nullptr, &render_quad.w, &render_quad.h);
-        return *this;
-    }
+    auto operator=(SDL_Texture* texture) -> ManagedSDLTexture&;
 
-    auto width()  -> int { return render_quad.w; }
-    auto height() -> int { return render_quad.h; }
+    auto width()  -> int;
+    auto height() -> int;
 
-    auto setColour(SDL_Colour const& c) {
-        SDL_SetTextureColorMod(*this, c.r, c.g, c.b);
-    }
+    auto setColour(SDL_Colour const& c) -> void;
 
-    auto setBlendMode(SDL_BlendMode blending) {
-        SDL_SetTextureBlendMode(*this, blending);
-    }
+    auto setBlendMode(SDL_BlendMode blending) -> void;
 
-    auto setAlpha(uint8_t alpha) {
-        SDL_SetTextureAlphaMod(*this, alpha);
-    }
+    auto setAlpha(uint8_t alpha) -> void;
 
-    auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_Rect* clip=nullptr, double angle=0.0, SDL_Point* center=nullptr, SDL_RendererFlip flip=SDL_FLIP_NONE) {
-        render_quad.x = x;
-        render_quad.y = y;
+    auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) -> void;
+    auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_RendererFlip flip) -> void;
+    auto render(ManagedSDLRenderer& renderer, int x, int y, double angle, SDL_Point* center) -> void;
+    auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_Rect* clip) -> void;
+    auto render(ManagedSDLRenderer& renderer, int x, int y) -> void;
 
-        if (clip) {
-            render_quad.w = clip->w;
-            render_quad.h = clip->h;
-        }
+    operator SDL_Texture*();
 
-        SDL_RenderCopyEx(renderer, *this, clip, &render_quad, angle, center, flip);
-    }
-    auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_RendererFlip flip) {
-        render(renderer, x, y, nullptr, 0.0, nullptr, flip);
-    }
-    auto render(ManagedSDLRenderer& renderer, int x, int y, double angle, SDL_Point* center) {
-        render(renderer, x, y, nullptr, angle, center, SDL_FLIP_NONE);
-    }
-    auto render(ManagedSDLRenderer& renderer, int x, int y, SDL_Rect* clip) {
-        render(renderer, x, y, clip, 0.0, nullptr, SDL_FLIP_NONE);
-    }
+    explicit operator bool();
 
-    operator SDL_Texture*() { return texture_.get(); }
-
-    explicit operator bool() { return texture_ != nullptr; }
-
-    auto operator->() -> SDL_Texture* { return texture_.get(); }
+    auto operator->() -> SDL_Texture*;
 };
+
+
+auto loadSurface(ManagedSDLSurface&, char const*, ManagedSDLSurface&) -> bool;
+auto loadTextureFromFile(ManagedSDLTexture&, ManagedSDLRenderer&, char const*, std::optional<SDL_Colour>color_key={}) -> bool;
+auto loadTextureFromText(ManagedSDLTexture&, ManagedSDLRenderer&, char const*, ManagedTTFFont&, SDL_Colour colour={0, 0, 0, 0}) -> bool;
+auto loadFont(ManagedTTFFont&, char const*, int) -> bool;
+auto init() -> bool;

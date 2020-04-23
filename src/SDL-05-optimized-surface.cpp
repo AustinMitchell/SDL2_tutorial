@@ -20,7 +20,6 @@ const int SCREEN_HEIGHT = 480;
 
 auto run() -> bool;
 auto init(ManagedSDLWindow&, ManagedSDLSurface&) -> bool;
-auto loadSurface(ManagedSDLSurface&, char const*, ManagedSDLSurface&) -> bool;
 template<uint64_t N>
 bool loadMedia(std::array<surface_string_pair, N>, ManagedSDLSurface&);
 
@@ -111,23 +110,5 @@ bool loadMedia(std::array<surface_string_pair, N> surfaces_to_load, ManagedSDLSu
     for (auto& pair: surfaces_to_load) {
         success = success && loadSurface(pair.first, pair.second, screen_surface);
     }
-    return success;
-}
-
-
-bool loadSurface(ManagedSDLSurface& image_surface, char const* image_name, ManagedSDLSurface& screen_surface) {
-    auto success        = true;
-    auto raw_surface    = ManagedSDLSurface{SDL_LoadBMP(image_name)};
-
-    if (!raw_surface) {
-        cout << "Unable to load image " << image_name << ". SDL Error: " << SDL_GetError() << "\n";
-        success = false;
-    } else {
-        image_surface = SDL_ConvertSurface(raw_surface, screen_surface->format, 0);
-        if (!image_surface) {
-            cout << "Unable to optimize image " << image_name << ". SDL Error: " << SDL_GetError() << "\n";
-        }
-    }
-
     return success;
 }
