@@ -32,7 +32,7 @@ auto run() -> bool {
     auto screen_surface = ManagedSDLSurface{};
     auto hello_image    = ManagedSDLSurface{};
     auto event          = SDL_Event{};
-    auto image_name     = std::string{"images/exit.bmp"};
+    auto image_name     = std::string{"images/t03/exit.bmp"};
     auto quit           = false;
 
     if (!init(window, screen_surface)) {

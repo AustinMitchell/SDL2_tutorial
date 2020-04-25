@@ -12,29 +12,31 @@
 
 using std::cout;
 
-auto loadSurface(ManagedSDLSurface& image_surface, char const* image_name, ManagedSDLSurface& screen_surface) -> bool {
-    auto raw_surface    = ManagedSDLSurface{IMG_Load(image_name)};
+auto loadSurface(char const* image_name, ManagedSDLSurface& screen_surface) -> SDL_Surface* {
+    SDL_Surface *image_surface = {};
+    auto raw_surface = ManagedSDLSurface{IMG_Load(image_name)};
 
     if (!raw_surface) {
         cout << "Unable to load image " << image_name << ". SDL_image Error: " << IMG_GetError() << "\n";
-        return false;
+        return {};
     }
     image_surface = SDL_ConvertSurface(raw_surface, screen_surface->format, 0);
     if (!image_surface) {
         cout << "Unable to optimize image " << image_name << ". SDL Error: " << SDL_GetError() << "\n";
-        return false;
+        return {};
     }
 
-    return true;
+    return image_surface;
 }
 
 
-auto loadTextureFromFile(ManagedSDLTexture& texture, ManagedSDLRenderer& renderer, char const* image_name, std::optional<SDL_Colour> color_key) -> bool {
+auto loadTextureFromFile(ManagedSDLRenderer& renderer, char const* image_name, std::optional<SDL_Colour> color_key) -> SDL_Texture* {
+    SDL_Texture *texture = {};
     auto loaded_surface = ManagedSDLSurface{IMG_Load(image_name)};
 
     if (!loaded_surface) {
         cout << "Unable to load image " << image_name << ". SDL_image Error: " << IMG_GetError() << "\n";
-        return false;
+        return {};
     }
 
     if (color_key) {
@@ -44,40 +46,41 @@ auto loadTextureFromFile(ManagedSDLTexture& texture, ManagedSDLRenderer& rendere
     texture = SDL_CreateTextureFromSurface(renderer, loaded_surface);
     if (!texture) {
         cout << "Unable to create texture from " << image_name << ". SDL Error: " << SDL_GetError() << "\n";
-        return false;
+        return {};
     }
 
-    return true;
+    return texture;
 }
 
 
-auto loadTextureFromText(ManagedSDLTexture& texture, ManagedSDLRenderer& renderer, char const* string_to_render, ManagedTTFFont& font, SDL_Colour colour) -> bool {
+auto loadTextureFromText(ManagedSDLRenderer& renderer, char const* string_to_render, ManagedTTFFont& font, SDL_Colour colour) -> SDL_Texture* {
+    SDL_Texture *texture = {};
     auto loaded_surface = ManagedSDLSurface{TTF_RenderText_Solid(font, string_to_render, colour)};
 
     if (!loaded_surface) {
         cout << "Unable to render text to surface. SDL_ttf Error: " << TTF_GetError() << "\n";
-        return false;
+        return {};
     }
 
     texture = SDL_CreateTextureFromSurface(renderer, loaded_surface);
     if (!texture) {
         cout << "Unable to create texture from rendered text. SDL Error: " << SDL_GetError() << "\n";
-        return false;
+        return {};
     }
 
-    return true;
+    return texture;
 }
 
 
-auto loadFont(ManagedTTFFont& font, char const* font_name, int size) -> bool {
-    font = TTF_OpenFont(font_name, size);
+auto loadFont(char const* font_name, int size) -> TTF_Font* {
+    auto font = TTF_OpenFont(font_name, size);
 
     if (!font) {
         cout << "Unable to load font " << font_name << ". SDL_ttf Error: " << TTF_GetError() << "\n";
-        return false;
+        return {};
     }
 
-    return true;
+    return font;
 }
 
 
@@ -100,6 +103,8 @@ auto init() -> bool {
         cout << "SDL_ttf could not initialize. SDL_ttf Error: " << TTF_GetError() << "\n";
         return false;
     }
+
+    cout << "SDL initialized successfully\n";
 
     return true;
 }

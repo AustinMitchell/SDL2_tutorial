@@ -1,6 +1,9 @@
 // Copyright 2020 Nathaniel Mitchell
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -52,7 +55,7 @@ auto run() -> bool {
     }
 
     auto surface_array = std::array<surface_string_pair, 1> {{
-            {scaled_surface, "images/stretch.bmp"}
+            {scaled_surface, "images/t06/loaded.png"}
         }};
     if (!loadMedia(surface_array, screen_surface)) {
         cout << "Failed to load media.\n";
@@ -96,8 +99,15 @@ auto init(ManagedSDLWindow& window, ManagedSDLSurface& screen_surface) -> bool {
             cout << "Window could not be created! SDL_Error: " << SDL_GetError() << "\n";
             success = false;
         } else {
-            //  Get window surface
-            screen_surface = SDL_GetWindowSurface(window);
+            //  Initialize PNG loading
+            int imgFlags = IMG_INIT_PNG;
+            if (!(IMG_Init(imgFlags) & imgFlags)) {
+                cout << "SDL_image could not initialize. SDL_image Error: " << IMG_GetError() << "\n";
+                success = false;
+            } else {
+                //  Get window surface
+                screen_surface = SDL_GetWindowSurface(window);
+            }
         }
     }
 
@@ -108,7 +118,8 @@ template<uint64_t N>
 bool loadMedia(std::array<surface_string_pair, N> surfaces_to_load, ManagedSDLSurface& screen_surface) {
     bool success = true;
     for (auto& pair: surfaces_to_load) {
-        success = success && loadSurface(pair.first, pair.second, screen_surface);
+        pair.first.get() = loadSurface(pair.second, screen_surface);
+        success = success && (!!pair.first.get());
     }
     return success;
 }

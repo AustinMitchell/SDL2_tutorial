@@ -31,7 +31,7 @@ auto run() -> bool {
     auto screen_surface = ManagedSDLSurface{};
     auto hello_image    = ManagedSDLSurface{};
 
-    auto image_name     = std::string{"images/hello.bmp"};
+    auto image_name     = std::string{"images/t02/hello.bmp"};
 
     if (!init(window, screen_surface)) {
         cout << "Failed to initialize.\n";

@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "SDL_helpers.hpp"
+#include "SDL_components.hpp"
 
 using std::cout;
 
@@ -22,10 +23,10 @@ const int SCREEN_HEIGHT = 480;
 
 
 struct ProgramData {
-    ManagedSDLWindow        window;
-    ManagedSDLSurface       screen_surface;
-    ManagedSDLRenderer      renderer;
-    ManagedSDLTexture       texture;
+    ManagedSDLWindow    window;
+    ManagedSDLSurface   screen_surface;
+    ManagedSDLRenderer  renderer;
+    TextureComponent    texture;
 };
 
 
@@ -72,6 +73,7 @@ auto run() -> bool {
             if (event.type == SDL_QUIT) {
                 quit = true;
             } else if (event.type == SDL_KEYDOWN) {
+                cout << "Key Press\n";
                 // On keypress change rgb values
                 switch (event.key.keysym.sym) {
                     // Increase red
@@ -112,8 +114,8 @@ auto run() -> bool {
         SDL_RenderClear(data.renderer);
 
         // Modulate and render texture
-        data.texture.setColour(modulation);
-        data.texture.render(data.renderer, 0, 0);
+        data.texture.texture().setColour(modulation);
+        data.texture.render(data.renderer);
 
         // Update screen
         SDL_RenderPresent(data.renderer);
@@ -164,8 +166,6 @@ auto init(ProgramData& data) -> bool {
 }
 
 auto loadMedia(ProgramData& data) -> bool {
-    bool success;
-
     // Create window
     data.window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!data.window) {
@@ -183,8 +183,9 @@ auto loadMedia(ProgramData& data) -> bool {
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    success = loadTextureFromFile(data.texture, data.renderer, "images/dots.png");
-    if (!success) { return false; }
+    auto cyan = SDL_Colour{0, 0xff, 0xff, 0};
+    data.texture = {ManagedSDLTexture{loadTextureFromFile(data.renderer, "images/t12/dots.png")}, {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}};
+    if (!data.texture.texture()) { return false; }
 
     return true;
 }

@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "SDL_helpers.hpp"
+#include "SDL_components.hpp"
 
 using std::cout;
 
@@ -25,18 +26,26 @@ struct ProgramData {
     ManagedSDLWindow    window;
     ManagedSDLSurface   screen_surface;
     ManagedSDLRenderer  renderer;
-    ManagedSDLTexture   texture;
-    ManagedTTFFont      font;
+
+    TextureComponent    foreground,
+                        background;
+};
+
+struct color {
+    int r,
+        g,
+        b,
+        a;
 };
 
 
 auto run() -> bool;
-auto loadData(ProgramData&) -> bool;
+auto loadMedia(ProgramData&) -> bool;
+auto printRect(SDL_Rect const&) -> void;
 
 
 int main() {
     run();
-    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
     return 0;
@@ -44,17 +53,24 @@ int main() {
 
 
 auto run() -> bool {
-    auto data       = ProgramData{};
-    auto event      = SDL_Event{};
-    auto quit       = false;
+    auto data = ProgramData{};
+
+    auto event          = SDL_Event{};
+    auto quit           = false;
+
+    auto stretchRect = SDL_Rect{};
+    stretchRect.x = 0;
+    stretchRect.y = 0;
+    stretchRect.w = SCREEN_WIDTH;
+    stretchRect.h = SCREEN_HEIGHT;
 
     if (!init()) {
         cout << "Failed to initialize.\n";
         return false;
     }
 
-    if (!loadData(data)) {
-        cout << "Failed to load data.\n";
+    if (!loadMedia(data)) {
+        cout << "Failed to load media.\n";
         return false;
     }
 
@@ -71,8 +87,11 @@ auto run() -> bool {
         SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(data.renderer);
 
-        // Render current frame
-        data.texture.render(data.renderer, (SCREEN_WIDTH - data.texture.width()) / 2, (SCREEN_HEIGHT - data.texture.height()) / 2);
+        // Render background texture to screen
+        data.background.render(data.renderer);
+
+        // Render Foo' to the screen
+        data.foreground.render(data.renderer);
 
         // Update screen
         SDL_RenderPresent(data.renderer);
@@ -82,11 +101,7 @@ auto run() -> bool {
 }
 
 
-auto loadData(ProgramData& data) -> bool {
-    bool success;
-
-    auto black = SDL_Colour{0, 0, 0, 0};
-
+auto loadMedia(ProgramData& data) -> bool {
     // Create window
     data.window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!data.window) {
@@ -104,14 +119,29 @@ auto loadData(ProgramData& data) -> bool {
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    // Get window surface
-    data.screen_surface = SDL_GetWindowSurface(data.window);
+    auto cyan = SDL_Colour{0, 0xFF, 0xFF, 0};
 
-    success = loadFont(data.font, "fonts/lazy.ttf", 28);
-    if (!success) { return false; }
+    data.background = loadTextureFromFile(data.renderer, "images/t10/background.png", cyan);
+    if (!data.background.texture()) { return false; }
+    data.background.setPos({0, 0}).setDimToTexture();
 
-    success = loadTextureFromText(data.texture, data.renderer, "The quick brown fox jumps over the lazy dog", data.font, black);
-    if (!success) { return false; }
+    data.foreground = loadTextureFromFile(data.renderer, "images/t10/foo.png", cyan);
+    if (!data.foreground.texture()) { return false; }
+    data.foreground.setPos({240, 190}).setDimToTexture();
+
+    cout << "Media loaded successfully\n";
+    cout << "background:         ";
+    printRect(data.background.rect());
+    cout << "background texture: ";
+    printRect(data.background.texture().clip());
+    cout << "texture:            ";
+    printRect(data.foreground.rect());
+    cout << "texture texture:    ";
+    printRect(data.foreground.texture().clip());
 
     return true;
+}
+
+auto printRect(SDL_Rect const& rect) -> void {
+    cout << "Rect: x=" << rect.x << " y=" << rect.y << " w=" << rect.w << " h=" << rect.h << "\n";
 }

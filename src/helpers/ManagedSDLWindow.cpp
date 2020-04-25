@@ -7,7 +7,7 @@
 #include <utility>
 #include <optional>
 
-#include <SDL_helpers.hpp>
+#include "helpers/ManagedSDLWindow.hpp"
 
 using window_ptr = std::unique_ptr<SDL_Window, void(*)(SDL_Window*)>;
 
@@ -22,6 +22,6 @@ auto ManagedSDLWindow::operator=(SDL_Window* window) -> ManagedSDLWindow& {
 
 ManagedSDLWindow::operator SDL_Window*() { return window_.get(); }
 
-ManagedSDLWindow::operator bool() { return window_ != nullptr; }
+ManagedSDLWindow::operator bool() const { return window_ != nullptr; }
 
 auto ManagedSDLWindow::operator->() -> SDL_Window*  { return window_.get(); }

@@ -24,12 +24,12 @@ struct ProgramData {
     ManagedSDLWindow    window;
     ManagedSDLSurface   screen_surface;
     ManagedSDLRenderer  renderer;
+    ManagedSDLTexture   texture;
 };
 
 
 auto run() -> bool;
-auto loadMedia(ProgramData&) -> bool;
-
+bool loadMedia(ProgramData&);
 
 int main() {
     run();
@@ -62,38 +62,16 @@ auto run() -> bool {
     }
 
     while (!quit) {
-        // Handle events on queue
+        //  Handle events on queue
         while (SDL_PollEvent(&event) != 0) {
             //  User requests quit
             if (event.type == SDL_QUIT) {
                 quit = true;
             }
         }
-        // clear screen
-        SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
         SDL_RenderClear(data.renderer);
-
-        // Render red filled quad
-        auto fillRect = SDL_Rect{SCREEN_WIDTH/4, SCREEN_HEIGHT/4, SCREEN_WIDTH/2, SCREEN_HEIGHT/2};
-        SDL_SetRenderDrawColor(data.renderer, 0xFF, 0x00, 0x00, 0xFF);
-        SDL_RenderFillRect(data.renderer, &fillRect);
-
-        // Render green outlined quad
-        auto outlineRect = SDL_Rect{SCREEN_WIDTH/6, SCREEN_HEIGHT/6, SCREEN_WIDTH * 2/3, SCREEN_HEIGHT * 2/3};
-        SDL_SetRenderDrawColor(data.renderer, 0x00, 0xFF, 0x00, 0xFF);
-        SDL_RenderDrawRect(data.renderer, &outlineRect);
-
-        // Draw blue horizontal line
-        SDL_SetRenderDrawColor(data.renderer, 0x00, 0x00, 0xFF, 0xFF);
-        SDL_RenderDrawLine(data.renderer, 0, SCREEN_HEIGHT/2, SCREEN_WIDTH, SCREEN_HEIGHT/2);
-
-        // Draw vertical line of yellow dots
-        SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0x00, 0xFF);
-        for (int i=0; i<SCREEN_HEIGHT; i+=4) {
-            SDL_RenderDrawPoint(data.renderer, SCREEN_WIDTH/2, i);
-        }
-
-        // display buffer
+        SDL_RenderCopy(data.renderer, data.texture, NULL, NULL);
         SDL_RenderPresent(data.renderer);
     }
 
@@ -101,9 +79,7 @@ auto run() -> bool {
 }
 
 
-auto loadMedia(ProgramData& data) -> bool {
-    bool success;
-
+bool loadMedia(ProgramData& data) {
     // Create window
     data.window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!data.window) {
@@ -120,6 +96,9 @@ auto loadMedia(ProgramData& data) -> bool {
 
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
+    data.texture = loadTextureFromFile(data.renderer, "images/t07/texture.png");
+    if (!data.texture) { return false; }
 
     return true;
 }

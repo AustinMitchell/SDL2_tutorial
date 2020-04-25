@@ -4,13 +4,14 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
+
 #include <iostream>
 #include <memory>
 #include <utility>
 #include <functional>
+#include <optional>
 
 #include "SDL_helpers.hpp"
-
 
 using std::cout;
 
@@ -25,14 +26,17 @@ struct ProgramData {
     ManagedSDLSurface   screen_surface;
     ManagedSDLRenderer  renderer;
     ManagedSDLTexture   texture;
+    ManagedTTFFont      font;
 };
 
 
 auto run() -> bool;
-bool loadMedia(ProgramData&);
+auto loadData(ProgramData&) -> bool;
+
 
 int main() {
     run();
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
     return 0;
@@ -40,29 +44,28 @@ int main() {
 
 
 auto run() -> bool {
-    auto data = ProgramData{};
-
-    auto event          = SDL_Event{};
-    auto quit           = false;
-
-    auto stretchRect = SDL_Rect{};
-    stretchRect.x = 0;
-    stretchRect.y = 0;
-    stretchRect.w = SCREEN_WIDTH;
-    stretchRect.h = SCREEN_HEIGHT;
+    auto data       = ProgramData{};
+    auto event      = SDL_Event{};
+    auto quit       = false;
 
     if (!init()) {
         cout << "Failed to initialize.\n";
         return false;
     }
 
-    if (!loadMedia(data)) {
-        cout << "Failed to load media.\n";
+    if (!loadData(data)) {
+        cout << "Failed to load data.\n";
         return false;
     }
 
+    auto render_rect = SDL_Rect{};
+    render_rect.x = (SCREEN_WIDTH  - data.texture.clipDim().x)/2;
+    render_rect.y = (SCREEN_HEIGHT - data.texture.clipDim().y)/2;
+    render_rect.w = data.texture.clipDim().x;
+    render_rect.h = data.texture.clipDim().y;
+
     while (!quit) {
-        //  Handle events on queue
+        // Handle events on queue
         while (SDL_PollEvent(&event) != 0) {
             //  User requests quit
             if (event.type == SDL_QUIT) {
@@ -70,8 +73,14 @@ auto run() -> bool {
             }
         }
 
+        // Clear screen
+        SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(data.renderer);
-        SDL_RenderCopy(data.renderer, data.texture, NULL, NULL);
+
+        // Render current frame
+        data.texture.render(data.renderer, &render_rect);
+
+        // Update screen
         SDL_RenderPresent(data.renderer);
     }
 
@@ -79,9 +88,7 @@ auto run() -> bool {
 }
 
 
-bool loadMedia(ProgramData& data) {
-    bool success = true;
-
+auto loadData(ProgramData& data) -> bool {
     // Create window
     data.window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!data.window) {
@@ -99,8 +106,15 @@ bool loadMedia(ProgramData& data) {
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    success = loadTextureFromFile(data.texture, data.renderer, "images/texture.png");
-    if (!success) { return false; }
+    // Get window surface
+    data.screen_surface = SDL_GetWindowSurface(data.window);
+
+    data.font = loadFont("fonts/lazy.ttf", 28);
+    if (!data.font) { return false; }
+
+    auto black = SDL_Colour{0, 0, 0, 0};
+    data.texture = loadTextureFromText(data.renderer, "The quick brown fox jumps over the lazy dog", data.font, black);
+    if (!data.texture) { return false; }
 
     return true;
 }

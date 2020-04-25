@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "SDL_helpers.hpp"
+#include "SDL_components.hpp"
 
 using std::cout;
 
@@ -20,29 +21,27 @@ using std::cout;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+const int BUTTON_WIDTH = 300;
+const int BUTTON_HEIGHT = 200;
+const int TOTAL_BUTTONS = 4;
+
 
 struct ProgramData {
     ManagedSDLWindow    window;
     ManagedSDLSurface   screen_surface;
     ManagedSDLRenderer  renderer;
-    ManagedSDLTexture   texture,
-                        background;
-};
-
-struct color {
-    int r,
-        g,
-        b,
-        a;
+    ManagedSDLTexture   sprite_sheet;
+    std::vector<Button> buttons;
 };
 
 
 auto run() -> bool;
-auto loadMedia(ProgramData&) -> bool;
+auto loadData(ProgramData&) -> bool;
 
 
 int main() {
     run();
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
     return 0;
@@ -50,24 +49,17 @@ int main() {
 
 
 auto run() -> bool {
-    auto data = ProgramData{};
-
-    auto event          = SDL_Event{};
-    auto quit           = false;
-
-    auto stretchRect = SDL_Rect{};
-    stretchRect.x = 0;
-    stretchRect.y = 0;
-    stretchRect.w = SCREEN_WIDTH;
-    stretchRect.h = SCREEN_HEIGHT;
+    auto data       = ProgramData{};
+    auto event      = SDL_Event{};
+    auto quit       = false;
 
     if (!init()) {
         cout << "Failed to initialize.\n";
         return false;
     }
 
-    if (!loadMedia(data)) {
-        cout << "Failed to load media.\n";
+    if (!loadData(data)) {
+        cout << "Failed to load data.\n";
         return false;
     }
 
@@ -78,17 +70,21 @@ auto run() -> bool {
             if (event.type == SDL_QUIT) {
                 quit = true;
             }
+
+            mouse::update(event);
+        }
+
+        for (auto& b: data.buttons) {
+            b.update();
         }
 
         // Clear screen
         SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(data.renderer);
 
-        // Render background texture to screen
-        data.background.render(data.renderer, 0, 0);
-
-        // Render Foo' to the screen
-        data.texture.render(data.renderer, 240, 190);
+        for (auto& b: data.buttons) {
+            b.render(data.renderer);
+        }
 
         // Update screen
         SDL_RenderPresent(data.renderer);
@@ -98,9 +94,7 @@ auto run() -> bool {
 }
 
 
-auto loadMedia(ProgramData& data) -> bool {
-    bool success;
-
+auto loadData(ProgramData& data) -> bool {
     // Create window
     data.window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!data.window) {
@@ -118,13 +112,31 @@ auto loadMedia(ProgramData& data) -> bool {
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    auto cyan = SDL_Colour{0, 0xFF, 0xFF, 0};
+    // Get window surface
+    data.screen_surface = SDL_GetWindowSurface(data.window);
 
-    success = loadTextureFromFile(data.background, data.renderer, "images/background.png", cyan);
-    if (!success) { return false; }
+    data.sprite_sheet = loadTextureFromFile(data.renderer, "images/button.png");
+    if (!data.sprite_sheet) { return false; }
 
-    success = loadTextureFromFile(data.texture, data.renderer, "images/foo.png", cyan);
-    if (!success) { return false; }
+    auto source_clips = std::array<SDL_Rect, 4> {
+            SDL_Rect{0,   0, BUTTON_WIDTH, BUTTON_HEIGHT},
+            SDL_Rect{0, 200, BUTTON_WIDTH, BUTTON_HEIGHT},
+            SDL_Rect{0, 400, BUTTON_WIDTH, BUTTON_HEIGHT},
+        };
+
+    auto screen_clips = std::array<SDL_Rect, 4> {
+            SDL_Rect{             0,               0, SCREEN_WIDTH/2, SCREEN_HEIGHT/2},
+            SDL_Rect{SCREEN_WIDTH/2,               0, SCREEN_WIDTH/2, SCREEN_HEIGHT/2},
+            SDL_Rect{             0, SCREEN_HEIGHT/2, SCREEN_WIDTH/2, SCREEN_HEIGHT/2},
+            SDL_Rect{SCREEN_WIDTH/2, SCREEN_HEIGHT/2, SCREEN_WIDTH/2, SCREEN_HEIGHT/2}
+        };
+
+    for (auto i=0; i<TOTAL_BUTTONS; i++) {
+        data.buttons.push_back(Button{ManagedSDLTexture{data.sprite_sheet, source_clips[0]},
+                                      ManagedSDLTexture{data.sprite_sheet, source_clips[1]},
+                                      ManagedSDLTexture{data.sprite_sheet, source_clips[2]},
+                                      screen_clips[i]});
+    }
 
     return true;
 }

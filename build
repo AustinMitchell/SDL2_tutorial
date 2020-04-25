@@ -28,14 +28,7 @@ def main():
             shutil.rmtree("objects-debug")
 
     dependency_mapping = {
-        "include/SDL_helpers.hpp":[
-            "src/helpers/ManagedSDLRenderer.cpp",
-            "src/helpers/ManagedSDLSurface.cpp",
-            "src/helpers/ManagedSDLTexture.cpp",
-            "src/helpers/ManagedSDLWindow.cpp",
-            "src/helpers/ManagedTTFFont.cpp",
-            "src/helpers/helpers.cpp",
-        ]
+
     }
 
     resource_mappings = {
@@ -45,11 +38,12 @@ def main():
 
     if args.s:
         config = {
-            "COMPILER":     "clang++",
-            "LINKER_FLAGS": "-lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer",
-            "SOURCE_MAIN":  Path(args.s).name,
-            "RESOURCES": resource_mappings,
-            "DEPEND_MAPPING": dependency_mapping
+            "COMPILER":         "clang++",
+            "LINKER_FLAGS":     "-lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer",
+            "SOURCE_DIR":       "src/",
+            "SOURCE_MAIN":      Path(args.s).relative_to("src"),
+            "RESOURCES":        resource_mappings,
+            "DEPEND_MAPPING":   dependency_mapping
         }
 
         if args.d:

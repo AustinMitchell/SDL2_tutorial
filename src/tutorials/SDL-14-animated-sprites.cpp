@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "SDL_helpers.hpp"
+#include "SDL_components.hpp"
 
 using std::cout;
 
@@ -22,16 +23,24 @@ const int SCREEN_HEIGHT = 480;
 
 
 struct ProgramData {
+    static const int WALKING_ANIMATION_FRAMES = 4;
+
     ManagedSDLWindow        window;
     ManagedSDLSurface       screen_surface;
     ManagedSDLRenderer      renderer;
-    ManagedSDLTexture       texture;
-    ManagedSDLTexture       background;
+    ManagedSDLTexture       sprite_sheet;
+
+    std::array<ManagedSDLTexture, WALKING_ANIMATION_FRAMES> sprite_clips;
 };
 
 
 auto run() -> bool;
 auto loadMedia(ProgramData&) -> bool;
+
+
+auto printRect(SDL_Rect const& rect) -> void {
+    cout << "Rect: x=" << rect.x << " y=" << rect.y << " w=" << rect.w << " h=" << rect.h << "\n";
+}
 
 
 int main() {
@@ -43,18 +52,10 @@ int main() {
 
 
 auto run() -> bool {
-    auto data = ProgramData{};
-
-    auto alpha = uint8_t{0xFF};
-
+    auto data   = ProgramData{};
+    auto frame  = 0;
     auto event  = SDL_Event{};
     auto quit   = false;
-
-    auto stretchRect = SDL_Rect{};
-    stretchRect.x = 0;
-    stretchRect.y = 0;
-    stretchRect.w = SCREEN_WIDTH;
-    stretchRect.h = SCREEN_HEIGHT;
 
     if (!init()) {
         cout << "Failed to initialize.\n";
@@ -66,28 +67,20 @@ auto run() -> bool {
         return false;
     }
 
+    auto rect = SDL_Rect{};
+    rect.x = (SCREEN_WIDTH  - data.sprite_sheet.clipDim().x/ProgramData::WALKING_ANIMATION_FRAMES) / 2;
+    rect.y = (SCREEN_HEIGHT - data.sprite_sheet.clipDim().y) / 2;
+    rect.w = data.sprite_sheet.clipDim().x/ProgramData::WALKING_ANIMATION_FRAMES;
+    rect.h = data.sprite_sheet.clipDim().y;
+
+    cout << "Render rect: "; printRect(rect);
+
     while (!quit) {
         // Handle events on queue
         while (SDL_PollEvent(&event) != 0) {
             //  User requests quit
             if (event.type == SDL_QUIT) {
                 quit = true;
-            } else if (event.type == SDL_KEYDOWN) {
-                if (event.key.keysym.sym == SDLK_w) {
-                    // Increase alpha on w
-                    if (alpha + 32 > 255) {
-                        alpha = 255;
-                    } else {
-                        alpha += 32;
-                    }
-                } else if (event.key.keysym.sym == SDLK_s) {
-                    // Decrease alpha on s
-                    if (alpha - 32 < 0) {
-                        alpha = 0;
-                    } else {
-                        alpha -= 32;
-                    }
-                }
             }
         }
 
@@ -95,15 +88,19 @@ auto run() -> bool {
         SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(data.renderer);
 
-        // Render background
-        data.background.render(data.renderer, 0, 0);
-
-        // Render front blended
-        data.texture.setAlpha(alpha);
-        data.texture.render(data.renderer, 0, 0);
+        // Render current frame
+        data.sprite_clips[frame/8].render(data.renderer, &rect);
 
         // Update screen
         SDL_RenderPresent(data.renderer);
+
+        // Go to next frame
+        ++frame;
+
+        // Cycle animation
+        if (frame/8 >= ProgramData::WALKING_ANIMATION_FRAMES) {
+            frame = 0;
+        }
     }
 
     return true;
@@ -125,7 +122,7 @@ auto init(ProgramData& data) -> bool {
     }
 
     // create renderer
-    data.renderer = SDL_CreateRenderer(data.window, -1, SDL_RENDERER_ACCELERATED);
+    data.renderer = SDL_CreateRenderer(data.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!data.renderer) {
         cout << "Renderer could not be created. SDL_Error: " << SDL_GetError() << "\n";
         return false;
@@ -147,9 +144,8 @@ auto init(ProgramData& data) -> bool {
     return true;
 }
 
-auto loadMedia(ProgramData& data) -> bool {
-    bool success;
 
+auto loadMedia(ProgramData& data) -> bool {
     // Create window
     data.window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!data.window) {
@@ -167,12 +163,20 @@ auto loadMedia(ProgramData& data) -> bool {
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    success = loadTextureFromFile(data.texture, data.renderer, "images/fadeout.png");
-    if (!success) { return false; }
-    data.texture.setBlendMode(SDL_BLENDMODE_BLEND);
+    auto cyan = SDL_Colour{0, 0xff, 0xff, 0};
+    data.sprite_sheet = ManagedSDLTexture{loadTextureFromFile(data.renderer, "images/t14/foo.png", cyan)};
+    if (!data.sprite_sheet) { return false; }
 
-    success = loadTextureFromFile(data.background,  data.renderer, "images/fadein.png");
-    if (!success) { return false; }
+    data.sprite_clips[0] = ManagedSDLTexture{data.sprite_sheet, SDL_Rect{  0, 0, 64, 205}};
+    data.sprite_clips[1] = ManagedSDLTexture{data.sprite_sheet, SDL_Rect{ 64, 0, 64, 205}};
+    data.sprite_clips[2] = ManagedSDLTexture{data.sprite_sheet, SDL_Rect{128, 0, 64, 205}};
+    data.sprite_clips[3] = ManagedSDLTexture{data.sprite_sheet, SDL_Rect{196, 0, 64, 205}};
+
+    cout << "OG texture:  "; printRect(data.sprite_sheet.clip());
+    cout << "clip 0:      "; printRect(data.sprite_clips[0].clip());
+    cout << "clip 1:      "; printRect(data.sprite_clips[1].clip());
+    cout << "clip 2:      "; printRect(data.sprite_clips[2].clip());
+    cout << "clip 3:      "; printRect(data.sprite_clips[3].clip());
 
     return true;
 }

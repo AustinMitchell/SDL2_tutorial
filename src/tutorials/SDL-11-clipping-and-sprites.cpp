@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "SDL_helpers.hpp"
+#include "SDL_components.hpp"
 
 using std::cout;
 
@@ -26,7 +27,7 @@ struct ProgramData {
     ManagedSDLSurface       screen_surface;
     ManagedSDLRenderer      renderer;
     ManagedSDLTexture       sprite_sheet;
-    std::array<SDL_Rect, 4> sprite_clips;
+    std::array<TextureComponent, 4> sprite_clips;
 };
 
 struct color {
@@ -35,11 +36,7 @@ struct color {
 
 
 auto run() -> bool;
-auto init(ProgramData&) -> bool;
 auto loadMedia(ProgramData&) -> bool;
-auto loadSurface(ManagedSDLSurface&, char const*, ManagedSDLSurface&) -> bool;
-auto loadTexture(ManagedSDLTexture&, char const*, ManagedSDLRenderer&, std::optional<color>) -> bool;
-
 
 int main() {
     run();
@@ -61,7 +58,7 @@ auto run() -> bool {
     stretchRect.w = SCREEN_WIDTH;
     stretchRect.h = SCREEN_HEIGHT;
 
-    if (!init(data)) {
+    if (!init()) {
         cout << "Failed to initialize.\n";
         return false;
     }
@@ -85,16 +82,16 @@ auto run() -> bool {
         SDL_RenderClear(data.renderer);
 
         // Render top left sprite
-        data.sprite_sheet.render(data.renderer, 0, 0, &data.sprite_clips[0]);
+        data.sprite_clips[0].render(data.renderer);
 
         // Render top right sprite
-        data.sprite_sheet.render(data.renderer, SCREEN_WIDTH - data.sprite_clips[1].w, 0, &data.sprite_clips[1]);
+        data.sprite_clips[1].render(data.renderer);
 
         // Render bottom left sprite
-        data.sprite_sheet.render(data.renderer, 0, SCREEN_HEIGHT - data.sprite_clips[2].h, &data.sprite_clips[2]);
+        data.sprite_clips[2].render(data.renderer);
 
         // Render bottom right sprite
-        data.sprite_sheet.render(data.renderer, SCREEN_WIDTH - data.sprite_clips[3].w, SCREEN_HEIGHT - data.sprite_clips[3].h, &data.sprite_clips[3]);
+        data.sprite_clips[3].render(data.renderer);
 
         // Update screen
         SDL_RenderPresent(data.renderer);
@@ -142,8 +139,6 @@ auto init(ProgramData& data) -> bool {
 }
 
 auto loadMedia(ProgramData& data) -> bool {
-    bool success;
-
     // Create window
     data.window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!data.window) {
@@ -163,13 +158,25 @@ auto loadMedia(ProgramData& data) -> bool {
 
     auto cyan = SDL_Colour{0, 0xFF, 0xFF, 0};
 
-    success = loadTextureFromFile(data.sprite_sheet, data.renderer, "images/dots.png", cyan);
-    if (!success) { return false; }
+    data.sprite_sheet = loadTextureFromFile(data.renderer, "images/t11/dots.png", cyan);
+    if (!data.sprite_sheet) { return false; }
 
-    data.sprite_clips[0] = {0,   0,   100, 100};
-    data.sprite_clips[1] = {100, 0,   100, 100};
-    data.sprite_clips[2] = {0,   100, 100, 100};
-    data.sprite_clips[3] = {100, 100, 100, 100};
+    // //Render top left sprite
+    // gSpriteSheetTexture.render(0, 0, &gSpriteClips[0]);
+
+    // //Render top right sprite
+    // gSpriteSheetTexture.render(SCREEN_WIDTH - gSpriteClips[1].w, 0, &gSpriteClips[1]);
+
+    // //Render bottom left sprite
+    // gSpriteSheetTexture.render(0, SCREEN_HEIGHT - gSpriteClips[2].h, &gSpriteClips[2]);
+
+    // //Render bottom right sprite
+    // gSpriteSheetTexture.render(SCREEN_WIDTH - gSpriteClips[3].w, SCREEN_HEIGHT - gSpriteClips[3].h, &gSpriteClips[3]);
+
+    data.sprite_clips[0] = TextureComponent{ManagedSDLTexture{data.sprite_sheet, SDL_Rect{  0,   0, 100, 100}}, {               0,                 0, 100, 100}};
+    data.sprite_clips[1] = TextureComponent{ManagedSDLTexture{data.sprite_sheet, SDL_Rect{100,   0, 100, 100}}, {SCREEN_WIDTH-100,                 0, 100, 100}};
+    data.sprite_clips[2] = TextureComponent{ManagedSDLTexture{data.sprite_sheet, SDL_Rect{  0, 100, 100, 100}}, {               0, SCREEN_HEIGHT-100, 100, 100}};
+    data.sprite_clips[3] = TextureComponent{ManagedSDLTexture{data.sprite_sheet, SDL_Rect{100, 100, 100, 100}}, {SCREEN_WIDTH-100, SCREEN_HEIGHT-100, 100, 100}};
 
     return true;
 }

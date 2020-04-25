@@ -48,11 +48,11 @@ auto run() -> bool {
 
     auto key_press_surfaces     = std::array<ManagedSDLSurface, SS_TOTAL>{};
     auto key_press_image_names  = std::array<char const*, SS_TOTAL>{
-            "images/key_presses/press.bmp",
-            "images/key_presses/up.bmp",
-            "images/key_presses/down.bmp",
-            "images/key_presses/left.bmp",
-            "images/key_presses/right.bmp"
+            "images/t04/press.bmp",
+            "images/t04/up.bmp",
+            "images/t04/down.bmp",
+            "images/t04/left.bmp",
+            "images/t04/right.bmp"
         };
 
     auto event          = SDL_Event{};

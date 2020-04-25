@@ -7,7 +7,7 @@
 #include <utility>
 #include <optional>
 
-#include <SDL_helpers.hpp>
+#include "helpers/ManagedSDLRenderer.hpp"
 
 using renderer_ptr = std::unique_ptr<SDL_Renderer, void(*)(SDL_Renderer*)>;
 
@@ -22,6 +22,6 @@ auto ManagedSDLRenderer::operator=(SDL_Renderer* renderer) -> ManagedSDLRenderer
 
 ManagedSDLRenderer::operator SDL_Renderer*() { return renderer_.get(); }
 
-ManagedSDLRenderer::operator bool() { return renderer_ != nullptr; }
+ManagedSDLRenderer::operator bool() const { return renderer_ != nullptr; }
 
 auto ManagedSDLRenderer::operator->() -> SDL_Renderer*  { return renderer_.get(); }

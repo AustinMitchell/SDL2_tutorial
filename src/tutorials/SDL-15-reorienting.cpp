@@ -4,13 +4,14 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
+
 #include <iostream>
 #include <memory>
 #include <utility>
 #include <functional>
+#include <optional>
 
 #include "SDL_helpers.hpp"
-
 
 using std::cout;
 
@@ -41,16 +42,11 @@ int main() {
 
 
 auto run() -> bool {
-    auto data = ProgramData{};
-
-    auto event          = SDL_Event{};
-    auto quit           = false;
-
-    auto stretchRect = SDL_Rect{};
-    stretchRect.x = 0;
-    stretchRect.y = 0;
-    stretchRect.w = SCREEN_WIDTH;
-    stretchRect.h = SCREEN_HEIGHT;
+    auto data       = ProgramData{};
+    auto event      = SDL_Event{};
+    auto quit       = false;
+    auto degrees    = 0.0;
+    auto flip_type  = SDL_FLIP_NONE;
 
     if (!init()) {
         cout << "Failed to initialize.\n";
@@ -62,49 +58,51 @@ auto run() -> bool {
         return false;
     }
 
+    auto render_rect = SDL_Rect{};
+    render_rect.x = (SCREEN_WIDTH  - data.texture.clipDim().x)/2;
+    render_rect.y = (SCREEN_HEIGHT - data.texture.clipDim().y)/2;
+    render_rect.w = data.texture.clipDim().x;
+    render_rect.h = data.texture.clipDim().y;
+
     while (!quit) {
         // Handle events on queue
         while (SDL_PollEvent(&event) != 0) {
             //  User requests quit
             if (event.type == SDL_QUIT) {
                 quit = true;
+            } else if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+                    case SDLK_a:
+                        degrees -= 60;
+                        break;
+
+                    case SDLK_d:
+                        degrees += 60;
+                        break;
+
+                    case SDLK_q:
+                        flip_type = SDL_FLIP_HORIZONTAL;
+                        break;
+
+                    case SDLK_w:
+                        flip_type = SDL_FLIP_NONE;
+                        break;
+
+                    case SDLK_e:
+                        flip_type = SDL_FLIP_VERTICAL;
+                        break;
+                }
             }
         }
 
-        // Top left corner viewport
-        SDL_Rect topLeftViewport;
-        topLeftViewport.x = 0;
-        topLeftViewport.y = 0;
-        topLeftViewport.w = SCREEN_WIDTH / 2;
-        topLeftViewport.h = SCREEN_HEIGHT / 2;
-        SDL_RenderSetViewport(data.renderer, &topLeftViewport);
+        // Clear screen
+        SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_RenderClear(data.renderer);
 
-        // Render texture to screen
-        SDL_RenderCopy(data.renderer, data.texture, NULL, NULL);
+        // Render arrow
+        data.texture.render(data.renderer, &render_rect, degrees, NULL, flip_type);
 
-        // Top right viewport
-        SDL_Rect topRightViewport;
-        topRightViewport.x = SCREEN_WIDTH / 2;
-        topRightViewport.y = 0;
-        topRightViewport.w = SCREEN_WIDTH / 2;
-        topRightViewport.h = SCREEN_HEIGHT / 2;
-        SDL_RenderSetViewport(data.renderer, &topRightViewport);
-
-        // Render texture to screen
-        SDL_RenderCopy(data.renderer, data.texture, NULL, NULL);
-
-        // Bottom viewport
-        SDL_Rect bottomViewport;
-        bottomViewport.x = 0;
-        bottomViewport.y = SCREEN_HEIGHT / 2;
-        bottomViewport.w = SCREEN_WIDTH;
-        bottomViewport.h = SCREEN_HEIGHT / 2;
-        SDL_RenderSetViewport(data.renderer, &bottomViewport);
-
-        // Render texture to screen
-        SDL_RenderCopy(data.renderer, data.texture, NULL, NULL);
-
-        // display buffer
+        // Update screen
         SDL_RenderPresent(data.renderer);
     }
 
@@ -113,8 +111,6 @@ auto run() -> bool {
 
 
 auto loadMedia(ProgramData& data) -> bool {
-    bool success;
-
     // Create window
     data.window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!data.window) {
@@ -132,8 +128,8 @@ auto loadMedia(ProgramData& data) -> bool {
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    success = loadTextureFromFile(data.texture, data.renderer, "images/viewport.png");
-    if (!success) { return false; }
+    data.texture = loadTextureFromFile(data.renderer, "images/t15/arrow.png");
+    if (!data.texture) { return false; }
 
     return true;
 }

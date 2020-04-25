@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "SDL_helpers.hpp"
+#include "SDL_components.hpp"
 
 using std::cout;
 
@@ -22,14 +23,11 @@ const int SCREEN_HEIGHT = 480;
 
 
 struct ProgramData {
-    static const int WALKING_ANIMATION_FRAMES = 4;
-
-    ManagedSDLWindow        window;
-    ManagedSDLSurface       screen_surface;
-    ManagedSDLRenderer      renderer;
-    ManagedSDLTexture       sprite_sheet;
-
-    std::array<SDL_Rect, WALKING_ANIMATION_FRAMES> sprite_clips;
+    ManagedSDLWindow    window;
+    ManagedSDLSurface   screen_surface;
+    ManagedSDLRenderer  renderer;
+    TextureComponent    foreground;
+    TextureComponent    background;
 };
 
 
@@ -46,8 +44,10 @@ int main() {
 
 
 auto run() -> bool {
-    auto data   = ProgramData{};
-    auto frame  = 0;
+    auto data = ProgramData{};
+
+    auto alpha = uint8_t{0xFF};
+
     auto event  = SDL_Event{};
     auto quit   = false;
 
@@ -73,6 +73,22 @@ auto run() -> bool {
             //  User requests quit
             if (event.type == SDL_QUIT) {
                 quit = true;
+            } else if (event.type == SDL_KEYDOWN) {
+                if (event.key.keysym.sym == SDLK_w) {
+                    // Increase alpha on w
+                    if (alpha + 32 > 255) {
+                        alpha = 255;
+                    } else {
+                        alpha += 32;
+                    }
+                } else if (event.key.keysym.sym == SDLK_s) {
+                    // Decrease alpha on s
+                    if (alpha - 32 < 0) {
+                        alpha = 0;
+                    } else {
+                        alpha -= 32;
+                    }
+                }
             }
         }
 
@@ -80,23 +96,15 @@ auto run() -> bool {
         SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(data.renderer);
 
-        // Render current frame
-        auto currentClip = &data.sprite_clips[frame / 4];
-        data.sprite_sheet.render(data.renderer, (SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip);
+        // Render background
+        data.background.render(data.renderer);
+
+        // Render front blended
+        data.foreground.texture().setAlpha(alpha);
+        data.foreground.render(data.renderer);
 
         // Update screen
         SDL_RenderPresent(data.renderer);
-
-        // Update screen
-        SDL_RenderPresent(data.renderer);
-
-        // Go to next frame
-        ++frame;
-
-        // Cycle animation
-        if (frame/4 >= ProgramData::WALKING_ANIMATION_FRAMES) {
-            frame = 0;
-        }
     }
 
     return true;
@@ -118,7 +126,7 @@ auto init(ProgramData& data) -> bool {
     }
 
     // create renderer
-    data.renderer = SDL_CreateRenderer(data.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    data.renderer = SDL_CreateRenderer(data.window, -1, SDL_RENDERER_ACCELERATED);
     if (!data.renderer) {
         cout << "Renderer could not be created. SDL_Error: " << SDL_GetError() << "\n";
         return false;
@@ -141,8 +149,6 @@ auto init(ProgramData& data) -> bool {
 }
 
 auto loadMedia(ProgramData& data) -> bool {
-    bool success;
-
     // Create window
     data.window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!data.window) {
@@ -160,13 +166,12 @@ auto loadMedia(ProgramData& data) -> bool {
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    success = loadTextureFromFile(data.sprite_sheet, data.renderer, "images/foo.png");
-    if (!success) { return false; }
+    data.foreground = TextureComponent{ManagedSDLTexture{loadTextureFromFile(data.renderer, "images/t13/fadeout.png")}, {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}};
+    if (!data.foreground.texture()) { return false; }
+    data.foreground.texture().setBlendMode(SDL_BLENDMODE_BLEND);
 
-    data.sprite_clips[0] = {  0, 0, 64, 205};
-    data.sprite_clips[1] = { 64, 0, 64, 205};
-    data.sprite_clips[2] = {128, 0, 64, 205};
-    data.sprite_clips[3] = {196, 0, 64, 205};
+    data.background = TextureComponent{ManagedSDLTexture{loadTextureFromFile(data.renderer, "images/t13/fadein.png")}, {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}};
+    if (!data.background.texture()) { return false; }
 
     return true;
 }
