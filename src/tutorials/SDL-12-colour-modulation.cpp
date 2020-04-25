@@ -10,6 +10,7 @@
 #include <utility>
 #include <functional>
 #include <optional>
+#include <algorithm>
 
 #include "SDL_helpers.hpp"
 #include "SDL_components.hpp"
@@ -73,37 +74,36 @@ auto run() -> bool {
             if (event.type == SDL_QUIT) {
                 quit = true;
             } else if (event.type == SDL_KEYDOWN) {
-                cout << "Key Press\n";
                 // On keypress change rgb values
                 switch (event.key.keysym.sym) {
                     // Increase red
                     case SDLK_q:
-                        modulation.r += 32;
+                        modulation.r += std::min<Uint8>(32, 255-modulation.r);
                         break;
 
                     // Increase green
                     case SDLK_w:
-                        modulation.g += 32;
+                        modulation.g += std::min<Uint8>(32, 255-modulation.g);
                         break;
 
                     // Increase blue
                     case SDLK_e:
-                        modulation.b += 32;
+                        modulation.b += std::min<Uint8>(32, 255-modulation.b);
                         break;
 
                     // Decrease red
                     case SDLK_a:
-                        modulation.r -= 32;
+                        modulation.r -= std::min<Uint8>(32, modulation.r);
                         break;
 
                     // Decrease green
                     case SDLK_s:
-                        modulation.g -= 32;
+                        modulation.g -= std::min<Uint8>(32, modulation.g);
                         break;
 
                     // Decrease blue
                     case SDLK_d:
-                        modulation.b -= 32;
+                        modulation.b -= std::min<Uint8>(32, modulation.b);
                         break;
                 }
             }
@@ -183,8 +183,7 @@ auto loadMedia(ProgramData& data) -> bool {
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    auto cyan = SDL_Colour{0, 0xff, 0xff, 0};
-    data.texture = {ManagedSDLTexture{loadTextureFromFile(data.renderer, "images/t12/dots.png")}, {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}};
+    data.texture = {ManagedSDLTexture{loadTextureFromFile(data.renderer, "images/t12/colors.png")}, {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}};
     if (!data.texture.texture()) { return false; }
 
     return true;

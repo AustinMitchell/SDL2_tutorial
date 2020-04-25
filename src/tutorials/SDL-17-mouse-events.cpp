@@ -11,6 +11,9 @@
 #include <functional>
 #include <optional>
 
+#include <chrono>
+#include <thread>
+
 #include "SDL_helpers.hpp"
 #include "SDL_components.hpp"
 
@@ -88,6 +91,8 @@ auto run() -> bool {
 
         // Update screen
         SDL_RenderPresent(data.renderer);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 
     return true;
@@ -115,7 +120,7 @@ auto loadData(ProgramData& data) -> bool {
     // Get window surface
     data.screen_surface = SDL_GetWindowSurface(data.window);
 
-    data.sprite_sheet = loadTextureFromFile(data.renderer, "images/button.png");
+    data.sprite_sheet = loadTextureFromFile(data.renderer, "images/t17/button.png");
     if (!data.sprite_sheet) { return false; }
 
     auto source_clips = std::array<SDL_Rect, 4> {
