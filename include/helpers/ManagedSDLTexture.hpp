@@ -10,14 +10,11 @@
 #include <utility>
 #include <optional>
 
-#include "ManagedSDLRenderer.hpp"
+#include "ManagedResource.hpp"
 
 
-struct ManagedSDLTexture {
-    using texture_ptr = std::unique_ptr<SDL_Texture, void(*)(SDL_Texture*)>;
-
+struct ManagedSDLTexture: public ManagedResource<SDL_Texture, SDL_DestroyTexture> {
     SDL_Rect src_clip_;
-    texture_ptr texture_;
 
     ManagedSDLTexture();
     explicit ManagedSDLTexture(SDL_Texture* sdl_texture, std::optional<SDL_Rect> source_clip={});
@@ -47,13 +44,6 @@ struct ManagedSDLTexture {
     auto render(SDL_Renderer* renderer, SDL_Rect* clip, SDL_RendererFlip flip) -> void;
     auto render(SDL_Renderer* renderer, SDL_Rect* clip) -> void;
     auto render(SDL_Renderer* renderer) -> void;
-
-    operator SDL_Texture*();
-    operator SDL_Texture*() const;
-
-    explicit operator bool() const;
-
-    auto operator->() -> SDL_Texture*;
 };
 
 #endif

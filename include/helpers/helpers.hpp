@@ -3,11 +3,8 @@
 
 #include <optional>
 
-#include "ManagedSDLRenderer.hpp"
-#include "ManagedSDLSurface.hpp"
+#include "ManagedResource.hpp"
 #include "ManagedSDLTexture.hpp"
-#include "ManagedSDLWindow.hpp"
-#include "ManagedTTFFont.hpp"
 
 
 auto loadSurface(char const*, ManagedSDLSurface&) -> SDL_Surface*;

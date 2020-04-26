@@ -86,7 +86,7 @@ auto loadFont(char const* font_name, int size) -> TTF_Font* {
 
 auto init() -> bool {
     // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
         cout << "SDL could not initialize. SDL_Error: " << SDL_GetError() << "\n";
         return false;
     }
@@ -101,6 +101,12 @@ auto init() -> bool {
     // Initialize SDL_ttf
     if (TTF_Init() == -1) {
         cout << "SDL_ttf could not initialize. SDL_ttf Error: " << TTF_GetError() << "\n";
+        return false;
+    }
+
+    // Initialize SDL_mixer
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        cout << "SDL_mixer could not initialize. SDL_mixer Error: " << Mix_GetError() << "\n";
         return false;
     }
 

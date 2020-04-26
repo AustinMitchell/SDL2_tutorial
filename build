@@ -33,7 +33,8 @@ def main():
 
     resource_mappings = {
         "res/images": "images",
-        "res/fonts":  "fonts"
+        "res/fonts":  "fonts",
+        "res/sounds": "sounds"
     }
 
     if args.s:

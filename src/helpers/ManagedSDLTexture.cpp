@@ -10,17 +10,10 @@
 
 #include "helpers/ManagedSDLTexture.hpp"
 
-using texture_ptr = std::unique_ptr<SDL_Texture, void(*)(SDL_Texture*)>;
 
+ManagedSDLTexture::ManagedSDLTexture(): ManagedResource() {}
 
-static void nothing(SDL_Texture*) {}
-static void deleter(SDL_Texture* tex) {
-    SDL_DestroyTexture(tex);
-}
-
-ManagedSDLTexture::ManagedSDLTexture(): texture_(nullptr, nothing) {}
-
-ManagedSDLTexture::ManagedSDLTexture(SDL_Texture* sdl_texture, std::optional<SDL_Rect> source_clip): texture_(sdl_texture, deleter) {
+ManagedSDLTexture::ManagedSDLTexture(SDL_Texture* sdl_texture, std::optional<SDL_Rect> source_clip): ManagedResource(sdl_texture) {
     if (source_clip) {
         src_clip_ = *source_clip;
     } else {
@@ -30,7 +23,7 @@ ManagedSDLTexture::ManagedSDLTexture(SDL_Texture* sdl_texture, std::optional<SDL
     }
 }
 
-ManagedSDLTexture::ManagedSDLTexture(ManagedSDLTexture& other, std::optional<SDL_Rect> source_clip): texture_(other, nothing) {
+ManagedSDLTexture::ManagedSDLTexture(ManagedSDLTexture& other, std::optional<SDL_Rect> source_clip): ManagedResource(std::forward<ManagedSDLTexture&>(other)) {
     if (source_clip) {
         src_clip_ = *source_clip;
     } else {
@@ -39,8 +32,7 @@ ManagedSDLTexture::ManagedSDLTexture(ManagedSDLTexture& other, std::optional<SDL
 }
 
 
-ManagedSDLTexture::ManagedSDLTexture(ManagedSDLTexture&& other, std::optional<SDL_Rect> source_clip): texture_(std::move(other.texture_)) {
-    other.texture_.get_deleter() = nothing;
+ManagedSDLTexture::ManagedSDLTexture(ManagedSDLTexture&& other, std::optional<SDL_Rect> source_clip): ManagedResource(std::forward<ManagedSDLTexture&&>(other)) {
     if (source_clip) {
         src_clip_ = *source_clip;
     } else {
@@ -50,7 +42,7 @@ ManagedSDLTexture::ManagedSDLTexture(ManagedSDLTexture&& other, std::optional<SD
 
 
 auto ManagedSDLTexture::operator=(SDL_Texture* sdl_texture) -> ManagedSDLTexture& {
-    texture_ = texture_ptr{sdl_texture, deleter};
+    ManagedResource::operator=(sdl_texture);
     src_clip_.x = 0;
     src_clip_.y = 0;
     SDL_QueryTexture(sdl_texture, nullptr, nullptr, &src_clip_.w, &src_clip_.h);
@@ -58,13 +50,13 @@ auto ManagedSDLTexture::operator=(SDL_Texture* sdl_texture) -> ManagedSDLTexture
 }
 
 auto ManagedSDLTexture::operator=(ManagedSDLTexture& other) -> ManagedSDLTexture& {
-    texture_ = texture_ptr{other, nothing};
+    ManagedResource::operator=(std::forward<ManagedSDLTexture&>(other));
     src_clip_ = other.src_clip_;
     return *this;
 }
 
 auto ManagedSDLTexture::operator=(ManagedSDLTexture&& other) -> ManagedSDLTexture& {
-    texture_.swap(other.texture_);
+    ManagedResource::operator=(std::forward<ManagedSDLTexture&&>(other));
     src_clip_ = other.src_clip_;
     return *this;
 }
@@ -117,10 +109,3 @@ auto ManagedSDLTexture::render(SDL_Renderer* renderer, SDL_Rect* clip) -> void {
 auto ManagedSDLTexture::render(SDL_Renderer* renderer) -> void {
     render(renderer, nullptr, 0.0, nullptr, SDL_FLIP_NONE);
 }
-
-ManagedSDLTexture::operator SDL_Texture*() { return texture_.get(); }
-ManagedSDLTexture::operator SDL_Texture*() const { return texture_.get(); }
-
-ManagedSDLTexture::operator bool() const { return texture_ != nullptr; }
-
-auto ManagedSDLTexture::operator->() -> SDL_Texture* { return texture_.get(); }
