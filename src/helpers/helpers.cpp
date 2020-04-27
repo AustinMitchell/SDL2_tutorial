@@ -53,7 +53,7 @@ auto loadTextureFromFile(ManagedSDLRenderer& renderer, char const* image_name, s
 }
 
 
-auto loadTextureFromText(ManagedSDLRenderer& renderer, char const* string_to_render, ManagedTTFFont& font, SDL_Colour colour) -> SDL_Texture* {
+auto loadTextureFromText(ManagedSDLRenderer& renderer, char const* string_to_render, ManagedTTFFont& font, SDL_Colour const& colour) -> SDL_Texture* {
     SDL_Texture *texture = {};
     auto loaded_surface = ManagedSDLSurface{TTF_RenderText_Solid(font, string_to_render, colour)};
 
