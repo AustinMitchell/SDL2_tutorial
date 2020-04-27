@@ -20,7 +20,7 @@ struct ManagedResource {
 
     ManagedResource():                                  resource_(nullptr, nothing<Resource>) {}
     explicit ManagedResource(Resource* resource):       resource_(resource, freeResource) {}
-    explicit ManagedResource(ManagedResource& other):   resource_(other, nothing<Resource>) {}
+    explicit ManagedResource(ManagedResource&  other):  resource_(other, nothing<Resource>) {}
     explicit ManagedResource(ManagedResource&& other):  resource_(std::move(other.resource_)) {
         other.resource_.get_deleter() = nothing<Resource>;
     }
