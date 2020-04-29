@@ -1,6 +1,6 @@
 #include "components/TextureComponent.hpp"
 
-TextureComponent::TextureComponent():   texture_(nullptr),
+TextureComponent::TextureComponent():   texture_(),
                                         rect_({0, 0, 0, 0}),
                                         hovering_(false),
                                         clicking_(false),
@@ -16,11 +16,13 @@ auto TextureComponent::pos()  const -> SDL_Point { return {rect_.x, rect_.y}; }
 auto TextureComponent::dim()  const -> SDL_Point { return {rect_.w, rect_.h}; }
 auto TextureComponent::rect() const -> SDL_Rect const&  { return rect_; }
 
-auto TextureComponent::setPos(SDL_Point pos) -> TextureComponent& { rect_.x = pos.x; rect_.y = pos.y; return *this; }
-auto TextureComponent::setDim(SDL_Point dim) -> TextureComponent& { rect_.w = dim.x; rect_.h = dim.y; return *this; }
+auto TextureComponent::setPos(SDL_Point const& pos)  -> TextureComponent& { rect_.x =  pos.x; rect_.y =  pos.y; return *this; }
+auto TextureComponent::setPos(SDL_Rect  const& rect) -> TextureComponent& { rect_.x = rect.x; rect_.y = rect.y; return *this; }
+auto TextureComponent::setDim(SDL_Point const& dim)  -> TextureComponent& { rect_.w =  dim.x; rect_.h =  dim.y; return *this; }
+auto TextureComponent::setDim(SDL_Rect  const& rect) -> TextureComponent& { rect_.w = rect.w; rect_.h = rect.h; return *this; }
 auto TextureComponent::setRect(SDL_Rect const& rect) -> TextureComponent& { rect_ = rect; return *this; }
 
-auto TextureComponent::setDimToTexture() -> TextureComponent& { setDim(texture_.clipDim()); return *this; }
+auto TextureComponent::setDimToTexture() -> TextureComponent& { setDim(texture_.dim()); return *this; }
 
 auto TextureComponent::update() -> void {
     clicked_ = false;

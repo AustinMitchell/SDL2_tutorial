@@ -27,7 +27,7 @@ struct ProgramData {
     ManagedSDLWindow    window;
     ManagedSDLSurface   screen_surface;
     ManagedSDLRenderer  renderer;
-    TextureComponent    texture;
+    ManagedSDLTexture   texture;
 };
 
 
@@ -114,7 +114,7 @@ auto run() -> bool {
         SDL_RenderClear(data.renderer);
 
         // Modulate and render texture
-        data.texture.texture().setColour(modulation);
+        data.texture.setColour(modulation);
         data.texture.render(data.renderer);
 
         // Update screen
@@ -183,8 +183,8 @@ auto loadMedia(ProgramData& data) -> bool {
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    data.texture = {ManagedSDLTexture{loadTextureFromFile(data.renderer, "images/t12/colors.png")}, {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}};
-    if (!data.texture.texture()) { return false; }
+    data.texture = loadTextureFromFile(data.renderer, "images/t12/colors.png");
+    if (!data.texture) { return false; }
 
     return true;
 }

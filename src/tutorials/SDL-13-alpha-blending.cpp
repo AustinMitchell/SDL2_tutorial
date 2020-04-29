@@ -26,8 +26,8 @@ struct ProgramData {
     ManagedSDLWindow    window;
     ManagedSDLSurface   screen_surface;
     ManagedSDLRenderer  renderer;
-    TextureComponent    foreground;
-    TextureComponent    background;
+    ManagedSDLTexture   foreground;
+    ManagedSDLTexture   background;
 };
 
 
@@ -100,7 +100,7 @@ auto run() -> bool {
         data.background.render(data.renderer);
 
         // Render front blended
-        data.foreground.texture().setAlpha(alpha);
+        data.foreground.setAlpha(alpha);
         data.foreground.render(data.renderer);
 
         // Update screen
@@ -166,12 +166,12 @@ auto loadMedia(ProgramData& data) -> bool {
     // Initialize renderer color
     SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    data.foreground = TextureComponent{ManagedSDLTexture{loadTextureFromFile(data.renderer, "images/t13/fadeout.png")}, {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}};
-    if (!data.foreground.texture()) { return false; }
-    data.foreground.texture().setBlendMode(SDL_BLENDMODE_BLEND);
+    data.foreground = loadTextureFromFile(data.renderer, "images/t13/fadeout.png");
+    if (!data.foreground) { return false; }
+    data.foreground.setBlendMode(SDL_BLENDMODE_BLEND);
 
-    data.background = TextureComponent{ManagedSDLTexture{loadTextureFromFile(data.renderer, "images/t13/fadein.png")}, {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}};
-    if (!data.background.texture()) { return false; }
+    data.background = loadTextureFromFile(data.renderer, "images/t13/fadein.png");
+    if (!data.background) { return false; }
 
     return true;
 }

@@ -58,11 +58,10 @@ auto run() -> bool {
         return false;
     }
 
-    auto render_rect = SDL_Rect{};
-    render_rect.x = (SCREEN_WIDTH  - data.texture.clipDim().x)/2;
-    render_rect.y = (SCREEN_HEIGHT - data.texture.clipDim().y)/2;
-    render_rect.w = data.texture.clipDim().x;
-    render_rect.h = data.texture.clipDim().y;
+    auto render_rect = SDL_Rect{(SCREEN_WIDTH  - data.texture.rect().w)/2,
+                                (SCREEN_HEIGHT - data.texture.rect().h)/2,
+                                data.texture.rect().w,
+                                data.texture.rect().h};
 
     while (!quit) {
         // Handle events on queue

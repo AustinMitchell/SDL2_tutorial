@@ -31,8 +31,10 @@ class TextureComponent {
     auto dim()  const -> SDL_Point;
     auto rect() const -> SDL_Rect const&;
 
-    auto setPos(SDL_Point pos) -> TextureComponent&;
-    auto setDim(SDL_Point dim) -> TextureComponent&;
+    auto setPos(SDL_Point const &pos)  -> TextureComponent&;
+    auto setPos(SDL_Rect  const &rect) -> TextureComponent&;
+    auto setDim(SDL_Point const &dim)  -> TextureComponent&;
+    auto setDim(SDL_Rect  const &rect) -> TextureComponent&;
     auto setRect(SDL_Rect const& rect) -> TextureComponent&;
 
     auto setDimToTexture() -> TextureComponent&;

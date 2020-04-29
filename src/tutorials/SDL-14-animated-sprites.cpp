@@ -67,13 +67,10 @@ auto run() -> bool {
         return false;
     }
 
-    auto rect = SDL_Rect{};
-    rect.x = (SCREEN_WIDTH  - data.sprite_sheet.clipDim().x/ProgramData::WALKING_ANIMATION_FRAMES) / 2;
-    rect.y = (SCREEN_HEIGHT - data.sprite_sheet.clipDim().y) / 2;
-    rect.w = data.sprite_sheet.clipDim().x/ProgramData::WALKING_ANIMATION_FRAMES;
-    rect.h = data.sprite_sheet.clipDim().y;
-
-    cout << "Render rect: "; printRect(rect);
+    auto rect = SDL_Rect{(SCREEN_WIDTH  - data.sprite_sheet.rect().w/ProgramData::WALKING_ANIMATION_FRAMES) / 2,
+                         (SCREEN_HEIGHT - data.sprite_sheet.rect().h) / 2,
+                         data.sprite_sheet.rect().w/ProgramData::WALKING_ANIMATION_FRAMES,
+                         data.sprite_sheet.rect().h};
 
     while (!quit) {
         // Handle events on queue
@@ -171,12 +168,6 @@ auto loadMedia(ProgramData& data) -> bool {
     data.sprite_clips[1] = ManagedSDLTexture{data.sprite_sheet, SDL_Rect{ 64, 0, 64, 205}};
     data.sprite_clips[2] = ManagedSDLTexture{data.sprite_sheet, SDL_Rect{128, 0, 64, 205}};
     data.sprite_clips[3] = ManagedSDLTexture{data.sprite_sheet, SDL_Rect{196, 0, 64, 205}};
-
-    cout << "OG texture:  "; printRect(data.sprite_sheet.clip());
-    cout << "clip 0:      "; printRect(data.sprite_clips[0].clip());
-    cout << "clip 1:      "; printRect(data.sprite_clips[1].clip());
-    cout << "clip 2:      "; printRect(data.sprite_clips[2].clip());
-    cout << "clip 3:      "; printRect(data.sprite_clips[3].clip());
 
     return true;
 }

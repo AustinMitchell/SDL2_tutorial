@@ -23,23 +23,6 @@ ManagedSDLTexture::ManagedSDLTexture(SDL_Texture* sdl_texture, std::optional<SDL
     }
 }
 
-ManagedSDLTexture::ManagedSDLTexture(ManagedSDLTexture& other, std::optional<SDL_Rect> source_clip): ManagedResource(std::forward<ManagedSDLTexture&>(other)) {
-    if (source_clip) {
-        src_clip_ = *source_clip;
-    } else {
-        src_clip_ = other.src_clip_;
-    }
-}
-
-
-ManagedSDLTexture::ManagedSDLTexture(ManagedSDLTexture&& other, std::optional<SDL_Rect> source_clip): ManagedResource(std::forward<ManagedSDLTexture&&>(other)) {
-    if (source_clip) {
-        src_clip_ = *source_clip;
-    } else {
-        src_clip_ = other.src_clip_;
-    }
-}
-
 
 auto ManagedSDLTexture::operator=(SDL_Texture* sdl_texture) -> ManagedSDLTexture& {
     ManagedResource::operator=(sdl_texture);
@@ -49,17 +32,6 @@ auto ManagedSDLTexture::operator=(SDL_Texture* sdl_texture) -> ManagedSDLTexture
     return *this;
 }
 
-auto ManagedSDLTexture::operator=(ManagedSDLTexture& other) -> ManagedSDLTexture& {
-    ManagedResource::operator=(std::forward<ManagedSDLTexture&>(other));
-    src_clip_ = other.src_clip_;
-    return *this;
-}
-
-auto ManagedSDLTexture::operator=(ManagedSDLTexture&& other) -> ManagedSDLTexture& {
-    ManagedResource::operator=(std::forward<ManagedSDLTexture&&>(other));
-    src_clip_ = other.src_clip_;
-    return *this;
-}
 
 auto ManagedSDLTexture::baseDim() const -> SDL_Point {
     SDL_Point dim;
@@ -67,9 +39,9 @@ auto ManagedSDLTexture::baseDim() const -> SDL_Point {
     return dim;
 }
 
-auto ManagedSDLTexture::clip() const -> SDL_Rect const& { return src_clip_; }
-auto ManagedSDLTexture::clipPos() const -> SDL_Point { return {src_clip_.x, src_clip_.y}; }
-auto ManagedSDLTexture::clipDim() const -> SDL_Point { return {src_clip_.w, src_clip_.h}; }
+auto ManagedSDLTexture::rect() const -> SDL_Rect const& { return src_clip_; }
+auto ManagedSDLTexture::pos() const -> SDL_Point { return {src_clip_.x, src_clip_.y}; }
+auto ManagedSDLTexture::dim() const -> SDL_Point { return {src_clip_.w, src_clip_.h}; }
 
 auto ManagedSDLTexture::setClip(SDL_Rect const& rect) -> ManagedSDLTexture& { src_clip_ = rect; return *this; }
 auto ManagedSDLTexture::setClipPos(SDL_Point const& pos) -> ManagedSDLTexture& { src_clip_.x = pos.x; src_clip_.y = pos.y; return *this; }

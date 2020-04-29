@@ -73,21 +73,21 @@ auto run() -> bool {
         return false;
     }
 
-    auto clip_prompt_start = SDL_Rect{(SCREEN_WIDTH-data.texture_prompt_start.clip().w) / 2,
+    auto clip_prompt_start = SDL_Rect{(SCREEN_WIDTH-data.texture_prompt_start.rect().w) / 2,
                                       0,
-                                      data.texture_prompt_start.clip().w,
-                                      data.texture_prompt_start.clip().h};
+                                      data.texture_prompt_start.rect().w,
+                                      data.texture_prompt_start.rect().h};
 
-    auto clip_prompt_pause = SDL_Rect{(SCREEN_WIDTH-data.texture_prompt_pause.clip().w) / 2,
+    auto clip_prompt_pause = SDL_Rect{(SCREEN_WIDTH-data.texture_prompt_pause.rect().w) / 2,
                                       clip_prompt_start.h+10,
-                                      data.texture_prompt_pause.clip().w,
-                                      data.texture_prompt_pause.clip().h};
+                                      data.texture_prompt_pause.rect().w,
+                                      data.texture_prompt_pause.rect().h};
 
 
-    auto clip_time   = SDL_Rect{(SCREEN_WIDTH-data.texture_time.clip().w) / 2,
-                                (SCREEN_HEIGHT-data.texture_time.clip().h) / 2,
-                                data.texture_time.clip().w,
-                                data.texture_time.clip().h};
+    auto clip_time   = SDL_Rect{(SCREEN_WIDTH-data.texture_time.rect().w) / 2,
+                                (SCREEN_HEIGHT-data.texture_time.rect().h) / 2,
+                                data.texture_time.rect().w,
+                                data.texture_time.rect().h};
 
     while (!quit) {
         // Handle events on queue
@@ -121,10 +121,10 @@ auto run() -> bool {
             cout << "Unable to render time texture.\n";
         }
 
-        clip_time = SDL_Rect{(SCREEN_WIDTH-data.texture_time.clip().w) / 2,
-                             (SCREEN_HEIGHT-data.texture_time.clip().h) / 2,
-                             data.texture_time.clip().w,
-                             data.texture_time.clip().h};
+        clip_time = SDL_Rect{(SCREEN_WIDTH-data.texture_time.rect().w) / 2,
+                             (SCREEN_HEIGHT-data.texture_time.rect().h) / 2,
+                             data.texture_time.rect().w,
+                             data.texture_time.rect().h};
 
         // Clear screen
         SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);

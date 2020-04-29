@@ -18,18 +18,20 @@ struct ManagedSDLTexture: public ManagedResource<SDL_Texture, SDL_DestroyTexture
 
     ManagedSDLTexture();
     explicit ManagedSDLTexture(SDL_Texture* sdl_texture, std::optional<SDL_Rect> source_clip={});
-    explicit ManagedSDLTexture(ManagedSDLTexture&  other, std::optional<SDL_Rect> source_clip={});
-    explicit ManagedSDLTexture(ManagedSDLTexture&& other, std::optional<SDL_Rect> source_clip={});
+
+    template<typename ManagedSDLTexture_T>
+    explicit ManagedSDLTexture(ManagedSDLTexture_T&& other, std::optional<SDL_Rect> source_clip={});
 
     auto operator=(SDL_Texture* sdl_texture) -> ManagedSDLTexture&;
-    auto operator=(ManagedSDLTexture& other) -> ManagedSDLTexture&;
-    auto operator=(ManagedSDLTexture&& other) -> ManagedSDLTexture&;
 
-    auto baseDim()    const -> SDL_Point;
+    template<typename ManagedSDLTexture_T>
+    auto operator=(ManagedSDLTexture_T&& other) -> ManagedSDLTexture&;
 
-    auto clip()    const -> SDL_Rect const&;
-    auto clipPos() const -> SDL_Point;
-    auto clipDim() const -> SDL_Point;
+    auto baseDim()  const -> SDL_Point;
+
+    auto rect() const -> SDL_Rect const&;
+    auto pos()  const -> SDL_Point;
+    auto dim()  const -> SDL_Point;
 
     auto setClip(SDL_Rect const&)     -> ManagedSDLTexture&;
     auto setClipPos(SDL_Point const&) -> ManagedSDLTexture&;
@@ -45,5 +47,21 @@ struct ManagedSDLTexture: public ManagedResource<SDL_Texture, SDL_DestroyTexture
     auto render(SDL_Renderer* renderer, SDL_Rect* clip) -> void;
     auto render(SDL_Renderer* renderer) -> void;
 };
+
+template<typename ManagedSDLTexture_T>
+auto ManagedSDLTexture::operator=(ManagedSDLTexture_T&& other) -> ManagedSDLTexture& {
+    ManagedResource::operator=(std::forward<ManagedSDLTexture_T>(other));
+    src_clip_ = other.src_clip_;
+    return *this;
+}
+
+template<typename ManagedSDLTexture_T>
+ManagedSDLTexture::ManagedSDLTexture(ManagedSDLTexture_T&& other, std::optional<SDL_Rect> source_clip): ManagedResource(std::forward<ManagedSDLTexture_T>(other)) {
+    if (source_clip) {
+        src_clip_ = *source_clip;
+    } else {
+        src_clip_ = other.src_clip_;
+    }
+}
 
 #endif

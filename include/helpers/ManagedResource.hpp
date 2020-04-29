@@ -12,29 +12,28 @@
 template<typename T>
 static void nothing(T*) {}
 
+/** Wraps a heap allocated object around a shared pointer with a custom deleter */
 template<typename Resource, void (*freeResource)(Resource*)>
 struct ManagedResource {
-    using resource_ptr = std::unique_ptr<Resource, decltype(freeResource)>;
+    using resource_ptr = std::shared_ptr<Resource>;
 
     resource_ptr resource_;
 
-    ManagedResource():                                  resource_(nullptr, nothing<Resource>) {}
-    explicit ManagedResource(Resource* resource):       resource_(resource, freeResource) {}
-    explicit ManagedResource(ManagedResource&  other):  resource_(other, nothing<Resource>) {}
-    explicit ManagedResource(ManagedResource&& other):  resource_(std::move(other.resource_)) {
-        other.resource_.get_deleter() = nothing<Resource>;
-    }
+    ManagedResource(): resource_(nullptr,  nothing<Resource>) {}
+
+    explicit ManagedResource(Resource* resource): resource_(resource, freeResource) {}
+
+    template<typename ManagedResource_T>
+    explicit ManagedResource(ManagedResource_T&&  other): resource_(other.resource_) {}
 
     auto operator=(Resource* resource) -> ManagedResource& {
         resource_ = resource_ptr{resource, freeResource};
         return *this;
     };
-    auto operator=(ManagedResource& other) -> ManagedResource& {
-        resource_ = resource_ptr{other, nothing<Resource>};
-        return *this;
-    }
-    auto operator=(ManagedResource&& other) -> ManagedResource& {
-        resource_.swap(other.resource_);
+
+    template<typename ManagedResource_T>
+    auto operator=(ManagedResource_T&& other) -> ManagedResource& {
+        resource_ = other.resource_;
         return *this;
     }
 

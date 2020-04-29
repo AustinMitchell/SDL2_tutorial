@@ -96,10 +96,10 @@ auto run() -> bool {
             cout << "Unable to render time texture.\n";
         }
 
-        auto clip_fps = SDL_Rect{(SCREEN_WIDTH-data.texture_fps.clip().w) / 2,
-                                 (SCREEN_HEIGHT-data.texture_fps.clip().h) / 2,
-                                 data.texture_fps.clip().w,
-                                 data.texture_fps.clip().h};
+        auto clip_fps = SDL_Rect{(SCREEN_WIDTH-data.texture_fps.rect().w) / 2,
+                                 (SCREEN_HEIGHT-data.texture_fps.rect().h) / 2,
+                                 data.texture_fps.rect().w,
+                                 data.texture_fps.rect().h};
 
         // Clear screen
         SDL_SetRenderDrawColor(data.renderer, 0xFF, 0xFF, 0xFF, 0xFF);

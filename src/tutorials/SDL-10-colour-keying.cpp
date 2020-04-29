@@ -27,7 +27,7 @@ struct ProgramData {
     ManagedSDLSurface   screen_surface;
     ManagedSDLRenderer  renderer;
 
-    TextureComponent    foreground,
+    ManagedSDLTexture   foreground,
                         background;
 };
 
@@ -58,12 +58,6 @@ auto run() -> bool {
     auto event          = SDL_Event{};
     auto quit           = false;
 
-    auto stretchRect = SDL_Rect{};
-    stretchRect.x = 0;
-    stretchRect.y = 0;
-    stretchRect.w = SCREEN_WIDTH;
-    stretchRect.h = SCREEN_HEIGHT;
-
     if (!init()) {
         cout << "Failed to initialize.\n";
         return false;
@@ -73,6 +67,8 @@ auto run() -> bool {
         cout << "Failed to load media.\n";
         return false;
     }
+
+    auto clip_foreground = SDL_Rect{240, 190, data.foreground.rect().w, data.foreground.rect().h};
 
     while (!quit) {
         // Handle events on queue
@@ -91,7 +87,7 @@ auto run() -> bool {
         data.background.render(data.renderer);
 
         // Render Foo' to the screen
-        data.foreground.render(data.renderer);
+        data.foreground.render(data.renderer, &clip_foreground);
 
         // Update screen
         SDL_RenderPresent(data.renderer);
@@ -122,22 +118,10 @@ auto loadMedia(ProgramData& data) -> bool {
     auto cyan = SDL_Colour{0, 0xFF, 0xFF, 0};
 
     data.background = loadTextureFromFile(data.renderer, "images/t10/background.png", cyan);
-    if (!data.background.texture()) { return false; }
-    data.background.setPos({0, 0}).setDimToTexture();
+    if (!data.background) { return false; }
 
     data.foreground = loadTextureFromFile(data.renderer, "images/t10/foo.png", cyan);
-    if (!data.foreground.texture()) { return false; }
-    data.foreground.setPos({240, 190}).setDimToTexture();
-
-    cout << "Media loaded successfully\n";
-    cout << "background:         ";
-    printRect(data.background.rect());
-    cout << "background texture: ";
-    printRect(data.background.texture().clip());
-    cout << "texture:            ";
-    printRect(data.foreground.rect());
-    cout << "texture texture:    ";
-    printRect(data.foreground.texture().clip());
+    if (!data.foreground) { return false; }
 
     return true;
 }
