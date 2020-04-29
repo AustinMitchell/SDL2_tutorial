@@ -22,8 +22,11 @@ using std::cout;
 
 
 // Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+const auto SCREEN_WIDTH = 640;
+const auto SCREEN_HEIGHT = 480;
+
+const auto FPS = 60;
+const auto TICKS_PER_FRAME = 1000 / FPS;
 
 
 struct ProgramData {
@@ -51,14 +54,14 @@ int main() {
 
 
 auto run() -> bool {
-    auto data       = ProgramData{};
-    auto event      = SDL_Event{};
-    auto quit       = false;
+    auto data           = ProgramData{};
+    auto event          = SDL_Event{};
+    auto quit           = false;
+    auto last_frame     = Uint32{0};
+    auto frame_timer    = Timer{};
 
     auto black      = SDL_Colour{0, 0, 0, 0xff};
     auto time_text  = std::stringstream{};
-
-    auto timer      = Timer{};
 
     auto counted_frames = 0;
 
@@ -72,7 +75,7 @@ auto run() -> bool {
         return false;
     }
 
-    timer.reset();
+    frame_timer.reset();
     while (!quit) {
         // Handle events on queue
         while (SDL_PollEvent(&event) != 0) {
@@ -84,10 +87,10 @@ auto run() -> bool {
             mouse::update(event);
         }
 
-        auto avg_fps = counted_frames / (timer.elapsed() / 1000.f);
+        auto avg_fps = counted_frames / (frame_timer.elapsed() / 1000.f);
 
         time_text.str("");
-        time_text << "Average frames per second: " << avg_fps;
+        time_text << "Average frames per second (with cap): " << avg_fps;
 
         // Render text
         data.texture_fps = loadTextureFromText(data.renderer, time_text.str().c_str(), data.font, black);
@@ -95,7 +98,7 @@ auto run() -> bool {
             cout << "Unable to render time texture.\n";
         }
 
-        auto clip_fps = SDL_Rect{100,
+        auto clip_fps = SDL_Rect{2,
                                  (SCREEN_HEIGHT-data.texture_fps.rect().h) / 2,
                                  data.texture_fps.rect().w,
                                  data.texture_fps.rect().h};
@@ -108,6 +111,10 @@ auto run() -> bool {
 
         // Update screen
         SDL_RenderPresent(data.renderer);
+
+        auto current_frame = frame_timer.elapsed();
+        SDL_Delay(static_cast<Uint32>(std::max(0, TICKS_PER_FRAME-static_cast<int>(current_frame-last_frame))));
+        last_frame = frame_timer.elapsed();
 
         counted_frames++;
     }
@@ -125,7 +132,7 @@ auto loadData(ProgramData& data) -> bool {
     }
 
     // create renderer
-    data.renderer = SDL_CreateRenderer(data.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    data.renderer = SDL_CreateRenderer(data.window, -1, SDL_RENDERER_ACCELERATED);
     if (!data.renderer) {
         cout << "Renderer could not be created. SDL_Error: " << SDL_GetError() << "\n";
         return false;
