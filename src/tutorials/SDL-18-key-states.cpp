@@ -11,8 +11,8 @@
 #include <functional>
 #include <optional>
 
-#include <chrono>
-#include <thread>
+#include <chrono> // NOLINT [build/c++11]
+#include <thread> // NOLINT [build/c++11]
 
 #include "SDL_helpers.hpp"
 #include "SDL_components.hpp"
@@ -42,7 +42,7 @@ auto run() -> bool;
 auto loadData(ProgramData&) -> bool;
 
 
-int main() {
+int main(__attribute__((unused))int argc, __attribute__((unused))char *argv[]) {
     run();
     TTF_Quit();
     IMG_Quit();

@@ -10,6 +10,7 @@
 #include <utility>
 #include <functional>
 #include <optional>
+#include <array>
 
 #include "SDL_helpers.hpp"
 #include "SDL_components.hpp"
@@ -38,7 +39,7 @@ struct color {
 auto run() -> bool;
 auto loadMedia(ProgramData&) -> bool;
 
-int main() {
+int main(__attribute__((unused))int argc, __attribute__((unused))char *argv[]) {
     run();
     IMG_Quit();
     SDL_Quit();

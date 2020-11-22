@@ -1,5 +1,4 @@
-#ifndef HELPERS_MANAGEDRESOURCE_HPP_
-#define HELPERS_MANAGEDRESOURCE_HPP_
+#pragma once
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -51,5 +50,3 @@ using ManagedSDLSurface     = ManagedResource<SDL_Surface,  SDL_FreeSurface>;
 using ManagedTTFFont        = ManagedResource<TTF_Font,     TTF_CloseFont>;
 using ManagedMixChunk       = ManagedResource<Mix_Chunk,    Mix_FreeChunk>;
 using ManagedMixMusic       = ManagedResource<Mix_Music,    Mix_FreeMusic>;
-
-#endif

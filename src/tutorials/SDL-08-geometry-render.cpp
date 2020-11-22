@@ -31,7 +31,7 @@ auto run() -> bool;
 auto loadMedia(ProgramData&) -> bool;
 
 
-int main() {
+int main(__attribute__((unused))int argc, __attribute__((unused))char *argv[]) {
     run();
     IMG_Quit();
     SDL_Quit();

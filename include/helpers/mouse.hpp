@@ -1,5 +1,4 @@
-#ifndef HELPERS_MOUSE_HPP_
-#define HELPERS_MOUSE_HPP_
+#pragma once
 
 #include <SDL2/SDL.h>
 
@@ -12,5 +11,3 @@ namespace mouse {
     auto moved() -> bool;
     auto update(SDL_Event const&) -> void;
 }
-
-#endif

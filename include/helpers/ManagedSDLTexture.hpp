@@ -1,5 +1,4 @@
-#ifndef HELPERS_MANAGEDSDLTEXTURE_HPP_
-#define HELPERS_MANAGEDSDLTEXTURE_HPP_
+#pragma once
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -63,5 +62,3 @@ ManagedSDLTexture::ManagedSDLTexture(ManagedSDLTexture_T&& other, std::optional<
         src_clip_ = other.src_clip_;
     }
 }
-
-#endif

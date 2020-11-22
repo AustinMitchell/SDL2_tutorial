@@ -31,7 +31,7 @@ struct ProgramData {
 auto run() -> bool;
 bool loadMedia(ProgramData&);
 
-int main() {
+int main(__attribute__((unused))int argc, __attribute__((unused))char *argv[]) {
     run();
     IMG_Quit();
     SDL_Quit();

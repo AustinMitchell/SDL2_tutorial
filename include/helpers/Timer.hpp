@@ -1,6 +1,9 @@
+#pragma once
+
 #include <SDL2/SDL.h>
 
 #include <optional>
+#include <algorithm>
 
 class Timer {
  private:

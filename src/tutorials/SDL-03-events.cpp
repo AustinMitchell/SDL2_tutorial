@@ -20,7 +20,7 @@ auto init(ManagedSDLWindow&, ManagedSDLSurface&) -> bool;
 auto loadMedia(ManagedSDLSurface&, std::string&) -> bool;
 
 
-int main() {
+int main(__attribute__((unused))int argc, __attribute__((unused))char *argv[]) {
     run();
     SDL_Quit();
     return 0;

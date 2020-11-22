@@ -44,7 +44,7 @@ auto loadMedia(ProgramData&) -> bool;
 auto printRect(SDL_Rect const&) -> void;
 
 
-int main() {
+int main(__attribute__((unused))int argc, __attribute__((unused))char *argv[]) {
     run();
     IMG_Quit();
     SDL_Quit();

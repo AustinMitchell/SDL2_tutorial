@@ -1,5 +1,4 @@
-#ifndef COMPONENTS_BUTTON_HPP_
-#define COMPONENTS_BUTTON_HPP_
+#pragma once
 
 #include <utility>
 
@@ -55,5 +54,3 @@ Button::Button(ManagedSDLTexture_T&& texture_default,
                                         hovering_(false),
                                         clicking_(false),
                                         clicked_(false) {}
-
-#endif

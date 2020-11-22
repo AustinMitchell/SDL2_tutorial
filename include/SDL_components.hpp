@@ -1,7 +1,4 @@
-#ifndef SDL_COMPONENTS_HPP_
-#define SDL_COMPONENTS_HPP_
+#pragma once
 
 #include "components/Button.hpp"
 #include "components/TextureComponent.hpp"
-
-#endif

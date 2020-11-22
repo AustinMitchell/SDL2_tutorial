@@ -1,5 +1,4 @@
-#ifndef HELPERS_HELPERS_HPP_
-#define HELPERS_HELPERS_HPP_
+#pragma once
 
 #include <optional>
 
@@ -12,5 +11,3 @@ auto loadTextureFromFile(ManagedSDLRenderer&, char const*, std::optional<SDL_Col
 auto loadTextureFromText(ManagedSDLRenderer&, char const*, ManagedTTFFont&, SDL_Colour const& colour={0, 0, 0, 0xff}) -> SDL_Texture*;
 auto loadFont(char const*, int) -> TTF_Font*;
 auto init() -> bool;
-
-#endif

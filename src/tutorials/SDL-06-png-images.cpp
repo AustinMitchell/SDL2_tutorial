@@ -8,6 +8,7 @@
 #include <memory>
 #include <utility>
 #include <functional>
+#include <array>
 
 #include "SDL_helpers.hpp"
 
@@ -27,7 +28,7 @@ template<uint64_t N>
 bool loadMedia(std::array<surface_string_pair, N>, ManagedSDLSurface&);
 
 
-int main() {
+int main(__attribute__((unused))int argc, __attribute__((unused))char *argv[]) {
     run();
     SDL_Quit();
     return 0;
@@ -117,9 +118,9 @@ auto init(ManagedSDLWindow& window, ManagedSDLSurface& screen_surface) -> bool {
 template<uint64_t N>
 bool loadMedia(std::array<surface_string_pair, N> surfaces_to_load, ManagedSDLSurface& screen_surface) {
     bool success = true;
-    for (auto& pair: surfaces_to_load) {
-        pair.first.get() = loadSurface(pair.second, screen_surface);
-        success = success && (!!pair.first.get());
+    for (auto& [surface_ref, filename]: surfaces_to_load) {
+        surface_ref.get() = loadSurface(filename, screen_surface);
+        success = success && (!!surface_ref.get());
     }
     return success;
 }

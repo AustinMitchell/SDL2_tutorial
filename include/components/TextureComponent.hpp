@@ -1,5 +1,4 @@
-#ifndef COMPONENTS_TEXTURECOMPONENT_HPP_
-#define COMPONENTS_TEXTURECOMPONENT_HPP_
+#pragma once
 
 #include <utility>
 
@@ -59,5 +58,3 @@ TextureComponent::TextureComponent(Texture_T&& texture,
                                                                 hovering_(false),
                                                                 clicking_(false),
                                                                 clicked_(false) {}
-
-#endif
