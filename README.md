@@ -1,7 +1,15 @@
 # SDL2_tutorial
 Project implementing Lazy Foo's SDL tutorials. Original tutorials located here: https://lazyfoo.net/tutorials/SDL/index.php
 
-This is my attempt to implement the tutorials in a more modern style and replacing some of the practices he employs with other solutions I like better. Currently this project doesn't account for Windows solutions without manual intervention. Requires Python3.
+This is my attempt to implement the tutorials in a more modern style and replacing some of the practices he employs with other solutions I like better. Currently this project doesn't account for Windows solutions without manual intervention.
+
+
+## Requirements
+
+- Currently only tested with clang++ and C++17
+- Python3
+- currently requires pyaml even if it's not directly used. Can be installed with pip3.
+- MSVC build tools
 
 ## Initialization
 
@@ -14,7 +22,7 @@ git submodule update --remote
 
 ## Building
 
-Assuming your SDL2 headers and libraries can be found via system path, select a tutorial and run the following command:
+Assuming your SDL2 headers and libraries can be found via system path, select a tutorial and run the following command with any of the cpp files from the tutorial folder:
 
 ```bash
 ./build -s src/tutorials/SDL-08-geometry-render.cpp
