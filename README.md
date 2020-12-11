@@ -8,7 +8,6 @@ This is my attempt to implement the tutorials in a more modern style and replaci
 
 - Currently only tested with clang++ and C++17
 - Python3
-- currently requires pyaml even if it's not directly used. Can be installed with pip3.
 - MSVC build tools
 
 ## Initialization
