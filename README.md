@@ -1,14 +1,15 @@
 # SDL2_tutorial
 Project implementing Lazy Foo's SDL tutorials. Original tutorials located here: https://lazyfoo.net/tutorials/SDL/index.php
 
-This is my attempt to implement the tutorials in a more modern style and replacing some of the practices he employs with other solutions I like better. Currently this project doesn't account for Windows solutions without manual intervention.
+This is my attempt to implement the tutorials in a more modern style and replacing some of the practices he employs with other solutions I like better.
 
 
 ## Requirements
 
 - Currently only tested with clang++ and C++17
 - Python3
-- MSVC build tools
+- MSVC build tools for windows builds
+- Requires SDL2 installation for non-windows builds
 
 ## Initialization
 
