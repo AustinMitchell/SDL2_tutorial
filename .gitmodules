@@ -1,6 +1,6 @@
 [submodule "C_build_script"]
 	path = C_build_script
-	url = git@github.com:AustinMitchell/C_build_script.git
+	url = https://github.com/AustinMitchell/C_build_script.git
 [submodule "SDL2-libs"]
 	path = lib/windows/SDL2-libs
-	url = git@github.com:AustinMitchell/SDL2-libs.git
+	url = https://github.com/AustinMitchell/SDL2-libs.git
