@@ -52,23 +52,25 @@ def main():
 
         # If we're on windows, we'll just provide the necessary headers and libs
         if sys.platform == "win32":
+            libpath = "lib/windows/SDL2-libs"
+
             config["OTHER_INCLUDE_PATHS"] = [
-                "lib/windows/SDL2/include",
-                "lib/windows/SDL2/include/SDL2",
-                "lib/windows/SDL2_image/include",
-                "lib/windows/SDL2_mixer/include",
-                "lib/windows/SDL2_ttf/include",
+                f"{libpath}/SDL2/include",
+                f"{libpath}/SDL2/include/SDL2",
+                f"{libpath}/SDL2_image/include",
+                f"{libpath}/SDL2_mixer/include",
+                f"{libpath}/SDL2_ttf/include",
             ]
             config["OTHER_LIB_PATHS"] = [
-                "lib/windows/SDL2/lib/x64/",
-                "lib/windows/SDL2_image/lib/x64/",
-                "lib/windows/SDL2_mixer/lib/x64/",
-                "lib/windows/SDL2_ttf/lib/x64/",
+                f"{libpath}/SDL2/lib/x64/",
+                f"{libpath}/SDL2_image/lib/x64/",
+                f"{libpath}/SDL2_mixer/lib/x64/",
+                f"{libpath}/SDL2_ttf/lib/x64/",
             ]
             config["LINKER_FLAGS"] = f"-Xlinker /subsystem:windows -lShell32 -lSDL2main " + config["LINKER_FLAGS"]
             
             # Find all DLLs and copy them into bin
-            resource_mappings["lib/windows/**/x64/**/*.dll"] = ""
+            resource_mappings[f"{libpath}/**/x64/**/*.dll"] = ""
 
         if args.d:
             config["COMPILER_FLAGS"] = "-std=c++17 -Wall -Wextra -Wpedantic -g -DDEBUG -Wno-language-extension-token"
