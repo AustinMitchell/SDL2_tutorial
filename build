@@ -11,8 +11,9 @@ from pathlib import Path
 def main():
 
     argparser = argparse.ArgumentParser()
-    argparser.add_argument("-s", action='store', type=str, metavar="SOURCE",   help="Source file to generate executable from")
-    argparser.add_argument("-o", action='store', type=str, metavar="EXE NAME", help="Executable output name")
+    argparser.add_argument("-s", action='store', type=str, metavar="SOURCE",    help="Source file to generate executable from")
+    argparser.add_argument("-o", action='store', type=str, metavar="EXE NAME",  help="Executable output name")
+    argparser.add_argument("-a", action='store_true', help="Build all and skip linking")
     argparser.add_argument("-d", action='store_true', help="Sets build to debug mode")
     argparser.add_argument("-c", action='store_true', help="Cleans all output files")
     args = argparser.parse_args()
@@ -39,15 +40,16 @@ def main():
         "res/sounds": ""
     }
 
-
-    if args.s:
+    if args.s or args.a:
         config = {
-            "COMPILER":         "clang++",
-            "LINKER_FLAGS":     "-lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer",
-            "SOURCE_DIR":       "src/",
-            "SOURCE_MAIN":      Path(args.s).relative_to("src"),
-            "RESOURCES":        resource_mappings,
-            "DEPEND_MAPPING":   dependency_mapping
+            "COMPILER":             "clang++",
+            "LINKER_FLAGS":         "-lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer",
+            "SOURCE_DIR":           "src/",
+            "SOURCE_MAIN":          "tutorials/*.cpp" if args.a else Path(args.s).relative_to("src"),
+            "RESOURCES":            resource_mappings,
+            "DEPEND_MAPPING":       dependency_mapping,
+            "COMPILATION_DATABASE": True,
+            "SKIP_LINKER":          True if args.a else False
         }
 
         # If we're on windows, we'll just provide the necessary headers and libs

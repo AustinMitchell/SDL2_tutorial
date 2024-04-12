@@ -36,7 +36,7 @@ To clean the project:
 
 ## Running
 
-The executable will be placed in `bin/`. To run, either navigate into `bin/` and run the executable, or execute the `runsh` or `runwin.bat` script.
+The executable will be placed in `bin/`. To run, either navigate into `bin/` and run the executable, or execute the `run` script.
 
 ## Troubleshooting
 
